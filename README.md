@@ -22,6 +22,14 @@ Here's how you can run the program:
 
 You can find the program on GitHub. Future iterations of this project may include the integration of more compression algorithms, providing an even broader understanding of the subject.
 
+Example results on the same text.txt file present in the current project:
+
+Huffman: Compressed equals the original one.
+Huffman reduced the size by -226.3157894736842%
+LZW: Compressed equals the original one.
+LZW reduced the size by -100.0%
+Passed all tests!
+
 **References:**
 
 - Python Language Reference, version 3.7. Available at http://www.python.org
