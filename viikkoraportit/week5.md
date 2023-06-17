@@ -1,0 +1,1 @@
+This week I did not have that much time to develop this project. Mostly, I was planning on how to make certain changes in the future weeks to this project. The peer review that was given to me gave me some insights into how I could make the project better.
