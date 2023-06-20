@@ -1,4 +1,5 @@
 import heapq as hq
+import time
 from collections import defaultdict as ddict
 
 def read_file(file_path):
@@ -88,7 +89,9 @@ def size_red(orig, comp):
 def check(file_path):
     tst_msg = read_file(file_path)
 
+    start_time = time.time()
     h_enc_msg, h_codes = huff_encode(tst_msg)
+    huffman_time = time.time() - start_time
     h_dec_msg = huff_decode(h_enc_msg, h_codes)
     if tst_msg == h_dec_msg:
         print("Huffman: Compressed equals the original one.")
@@ -96,8 +99,11 @@ def check(file_path):
         print("Huffman decoding failed!")
     h_red = size_red(tst_msg, h_enc_msg)
     print(f"Huffman reduced the size by {h_red}%")
+    print(f"Huffman compression took {huffman_time} seconds.")
 
+    start_time = time.time()
     lzw_comp_msg, lzw_dict = lzw_encode(tst_msg)
+    lzw_time = time.time() - start_time
     lzw_dec_msg = lzw_decode(lzw_comp_msg, lzw_dict)
     if tst_msg == lzw_dec_msg:
         print("LZW: Compressed equals the original one.")
@@ -105,9 +111,9 @@ def check(file_path):
         print("LZW decoding failed!")
     lzw_red = size_red(tst_msg, ''.join(map(str,lzw_comp_msg)))
     print(f"LZW reduced the size by {lzw_red}%")
+    print(f"LZW compression took {lzw_time} seconds.")
 
     print("Passed all tests!")
-
 
 if __name__ == "__main__":
     import sys
