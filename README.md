@@ -1,7 +1,3 @@
-# Documentation
-implementation.md
-
-
 # Data Structures and Algorithms Project
 
 In this project, I've tackled the problem of data compression, focusing specifically on binary data and using Python as my language of choice for implementation.
@@ -33,6 +29,8 @@ Huffman reduced the size by -683.69140625%
 LZW: Compressed equals the original one.
 LZW reduced the size by -155.56640625%
 Passed all tests!
+
+# Further Documentation 
 
 **References:**
 
