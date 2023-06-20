@@ -31,10 +31,11 @@ LZW reduced the size by -155.56640625%
 Passed all tests!
 
 # Further Documentation
-[Implementation](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/implementation.md)
-[Spesifications](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/specs.md)
-[Tests](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/tests.md)
-[User Guide](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/userguide.md)
+
+- [Implementation](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/implementation.md)
+- [Spesifications](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/specs.md)
+- [Tests](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/tests.md)
+- [User Guide](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/userguide.md)
 
 **References:**
 
