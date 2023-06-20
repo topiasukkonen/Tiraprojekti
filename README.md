@@ -30,7 +30,11 @@ LZW: Compressed equals the original one.
 LZW reduced the size by -155.56640625%
 Passed all tests!
 
-# Further Documentation 
+# Further Documentation
+[a link](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/implementation.md)
+[a link](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/specs.md)
+[a link](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/tests.md)
+[a link](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/userguide.md)
 
 **References:**
 
