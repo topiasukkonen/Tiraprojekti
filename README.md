@@ -25,9 +25,11 @@ You can find the program on GitHub. Future iterations of this project may includ
 Example results on the same binary file present in the current project:
 
 Huffman: Compressed equals the original one.
-Huffman reduced the size by -683.69140625%
+Huffman reduced the size by -700.0%
+Huffman compression took 0.12162113189697266 seconds.
 LZW: Compressed equals the original one.
-LZW reduced the size by -155.56640625%
+LZW reduced the size by -145.34272497897393%
+LZW compression took 0.004621028900146484 seconds.
 Passed all tests!
 
 # Further Documentation
