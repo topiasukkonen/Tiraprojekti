@@ -2,7 +2,7 @@ import heapq as hq
 from collections import defaultdict as ddict
 
 def read_file(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, 'rb') as file:
         return file.read()
 
 def huff_encode(msg):
@@ -10,21 +10,21 @@ def huff_encode(msg):
     for c in msg:
         freqs[c] += 1
 
-    pq = [[w, [sym, ""]] for sym, w in freqs.items()]
+    pq = [[w, [sym, b""]] for sym, w in freqs.items()]
     hq.heapify(pq)
 
     while len(pq) > 1:
         lo = hq.heappop(pq)
         hi = hq.heappop(pq)
         for p in lo[1:]:
-            p[1] = '0' + p[1]
+            p[1] = b'0' + p[1]
         for p in hi[1:]:
-            p[1] = '1' + p[1]
+            p[1] = b'1' + p[1]
         hq.heappush(pq, [lo[0] + hi[0]] + lo[1:] + hi[1:])
 
     huff_c = sorted(hq.heappop(pq)[1:], key=lambda p: (len(p[-1]), p))
 
-    enc_msg = ""
+    enc_msg = b""
     for c in msg:
         for item in huff_c:
             if c == item[0]:
@@ -35,22 +35,23 @@ def huff_encode(msg):
 def huff_decode(enc_msg, huff_c):
     inv_huff_c = {i[1]: i[0] for i in huff_c}
 
-    dec_msg = ""
-    t = ""
+    dec_msg = b""
+    t = b""
     for d in enc_msg:
-        t += d
+        t += bytes([d])
         if t in inv_huff_c:
-            dec_msg += inv_huff_c[t]
-            t = ""
+            dec_msg += bytes([inv_huff_c[t]])
+            t = b""
     return dec_msg
 
 def lzw_encode(msg):
     dict_size = 256
-    dict_ = {chr(i): i for i in range(dict_size)}
+    dict_ = {bytes([i]): i for i in range(dict_size)}
 
     res = []
-    s = msg[0]
+    s = bytes([msg[0]])
     for char in msg[1:]:
+        char = bytes([char])
         if s + char in dict_:
             s += char
         else:
@@ -70,11 +71,11 @@ def lzw_decode(comp_msg, dict_):
         if k in inv_dict:
             ent = inv_dict[k]
         elif k == len(inv_dict):
-            ent = s + s[0]
+            ent = s + s[0:1]
         else:
             raise ValueError('Bad compressed k: %s' % k)
         dec_msg += ent
-        inv_dict[len(inv_dict)] = s + ent[0]
+        inv_dict[len(inv_dict)] = s + ent[0:1]
         s = ent
     return dec_msg
 
@@ -111,6 +112,6 @@ def check(file_path):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
-        print("Usage: python3 compressor.py text_file_path")
+        print("Usage: python3 compressor.py binary_file_path")
     else:
         check(sys.argv[1])
