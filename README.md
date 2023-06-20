@@ -10,7 +10,7 @@ The Python script accepts a binary file as an input, performs Huffman and LZW en
 
 To assess the robustness and correctness of the algorithms, a suite of tests is included in the script. These tests ensure that the original binary data is equivalent to the decompressed data following compression and decompression - a critical check for any compression-decompression system.
 
-In addition to the compression-decompression process, the program also provides information about the effectiveness of the compression. It calculates and outputs the percentage reduction in binary data size achieved by the Huffman and LZW algorithms.
+In addition to the compression-decompression process, the program also provides information about the effectiveness of the compression. It calculates and outputs the percentage reduction in binary data size achieved by the Huffman and LZW algorithms. Also, time taken by each algorithm is provided to the user.
 
 Here's how you can run the program:
 
