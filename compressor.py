@@ -52,7 +52,7 @@ def lzw_encode(msg):
     res = []
     s = bytes([msg[0]])
     for char in msg[1:]:
-        char = bytes([char])
+        char = bytes([char])    
         if s + char in dict_:
             s += char
         else:
