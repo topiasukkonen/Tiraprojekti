@@ -1,10 +1,15 @@
 import heapq as hq
 import time
+import pickle
 from collections import defaultdict as ddict
 
 def read_file(file_path):
     with open(file_path, 'rb') as file:
         return file.read()
+
+def write_file(file_path, data):
+    with open(file_path, 'wb') as file:
+        pickle.dump(data, file)
 
 def huff_encode(msg):
     freqs = ddict(int)
@@ -95,6 +100,7 @@ def check(file_path):
     h_dec_msg = huff_decode(h_enc_msg, h_codes)
     if tst_msg == h_dec_msg:
         print("Huffman: Compressed equals the original one.")
+        write_file('packedHuff/compressed.bin', h_enc_msg)
     else:
         print("Huffman decoding failed!")
     h_red = size_red(tst_msg, h_enc_msg)
@@ -107,6 +113,7 @@ def check(file_path):
     lzw_dec_msg = lzw_decode(lzw_comp_msg, lzw_dict)
     if tst_msg == lzw_dec_msg:
         print("LZW: Compressed equals the original one.")
+        write_file('packedLZW/compressed.bin', lzw_comp_msg)
     else:
         print("LZW decoding failed!")
     lzw_red = size_red(tst_msg, ''.join(map(str,lzw_comp_msg)))
