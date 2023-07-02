@@ -3,14 +3,12 @@ from compressor import read_file, huff_encode, huff_decode, lzw_encode, lzw_deco
 
 # Test for reading files
 def test_read_file():
-    data = b'hello world'
-    with open('test.bin', 'wb') as file:
-        file.write(data)
-    assert read_file('test.bin') == data
+    data = read_file('testtext.txt')
+    assert data == read_file('text.txt')
 
 # Test Huffman encoding and decoding with a simple message
 def test_huff_encode_decode():
-    data = b'hello world'
+    data = read_file('testtext.txt')
     enc_data, huff_c = huff_encode(data)
     assert isinstance(enc_data, bytes)
     assert isinstance(huff_c, list)
@@ -18,7 +16,7 @@ def test_huff_encode_decode():
 
 # Test LZW encoding and decoding with a simple message
 def test_lzw_encode_decode():
-    data = b'hello world'
+    data = read_file('testtext.txt')
     comp_data, lzw_dict = lzw_encode(data)
     assert isinstance(comp_data, list)
     assert isinstance(lzw_dict, dict)
@@ -26,6 +24,6 @@ def test_lzw_encode_decode():
 
 # Test size reduction
 def test_size_red():
-    orig = b'hello world'
-    comp = b'0101010101'
+    orig = read_file('testtext.txt')
+    comp = huff_encode(orig)[0]  # Compressed using Huffman encoding as an example
     assert isinstance(size_red(orig, comp), float)

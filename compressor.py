@@ -16,38 +16,50 @@ def huff_encode(msg):
     for c in msg:
         freqs[c] += 1
 
-    pq = [[w, [sym, b""]] for sym, w in freqs.items()]
+    pq = [[w, [sym, ""]] for sym, w in freqs.items()]
     hq.heapify(pq)
 
     while len(pq) > 1:
         lo = hq.heappop(pq)
         hi = hq.heappop(pq)
         for p in lo[1:]:
-            p[1] = b'0' + p[1]
+            p[1] = '0' + p[1]
         for p in hi[1:]:
-            p[1] = b'1' + p[1]
+            p[1] = '1' + p[1]
         hq.heappush(pq, [lo[0] + hi[0]] + lo[1:] + hi[1:])
 
     huff_c = sorted(hq.heappop(pq)[1:], key=lambda p: (len(p[-1]), p))
 
-    enc_msg = b""
+    enc_msg = ""
     for c in msg:
         for item in huff_c:
             if c == item[0]:
                 enc_msg += item[1]
                 break
-    return enc_msg, huff_c
 
-def huff_decode(enc_msg, huff_c):
+    # Padding enc_msg to ensure it contains a multiple of 8 bits
+    extra_padding = 8 - len(enc_msg) % 8
+    enc_msg += '0' * extra_padding
+
+    # Converting bit string to bytes
+    enc_msg = int(enc_msg, 2).to_bytes((len(enc_msg) + 7) // 8, byteorder='big')
+
+    return enc_msg, huff_c, extra_padding
+
+def huff_decode(enc_msg, huff_c, extra_padding):
     inv_huff_c = {i[1]: i[0] for i in huff_c}
 
+    # Converting bytes to bit string
+    enc_msg = bin(int.from_bytes(enc_msg, byteorder='big'))[2:]
+    enc_msg = enc_msg[0: len(enc_msg) - extra_padding]
+
     dec_msg = b""
-    t = b""
+    t = ""
     for d in enc_msg:
-        t += bytes([d])
+        t += d
         if t in inv_huff_c:
             dec_msg += bytes([inv_huff_c[t]])
-            t = b""
+            t = ""
     return dec_msg
 
 def lzw_encode(msg):
@@ -92,12 +104,13 @@ def size_red(orig, comp):
     return red
 
 def check(file_path):
+    print(f"Conducting compression...")
     tst_msg = read_file(file_path)
 
     start_time = time.time()
-    h_enc_msg, h_codes = huff_encode(tst_msg)
+    h_enc_msg, h_codes, extra_padding = huff_encode(tst_msg) # Catch extra_padding
     huffman_time = time.time() - start_time
-    h_dec_msg = huff_decode(h_enc_msg, h_codes)
+    h_dec_msg = huff_decode(h_enc_msg, h_codes, extra_padding) # Pass extra_padding
     if tst_msg == h_dec_msg:
         print("Huffman: Compressed equals the original one.")
         write_file('packedHuff/compressed.bin', h_enc_msg)
@@ -121,6 +134,7 @@ def check(file_path):
     print(f"LZW compression took {lzw_time} seconds.")
 
     print("Passed all tests!")
+
 
 if __name__ == "__main__":
     import sys
