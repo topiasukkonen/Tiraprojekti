@@ -65,20 +65,21 @@ def huff_decode(enc_msg, huff_c, extra_padding):
 def lzw_encode(msg):
     dict_size = 256
     dict_ = {bytes([i]): i for i in range(dict_size)}
-
-    res = []
     s = bytes([msg[0]])
+    res = []
     for char in msg[1:]:
-        char = bytes([char])    
-        if s + char in dict_:
-            s += char
+        char = bytes([char])
+        s_plus_char = s + char
+        if s_plus_char in dict_:
+            s = s_plus_char
         else:
             res.append(dict_[s])
-            dict_[s + char] = dict_size
+            dict_[s_plus_char] = dict_size
             dict_size += 1
             s = char
     res.append(dict_[s])
     return res, dict_
+
 
 def lzw_decode(comp_msg, dict_):
     inv_dict = {v: k for k, v in dict_.items()}
