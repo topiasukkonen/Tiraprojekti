@@ -80,7 +80,6 @@ def lzw_encode(msg):
     res.append(dict_[s])
     return res, dict_
 
-
 def lzw_decode(comp_msg, dict_):
     inv_dict = {v: k for k, v in dict_.items()}
 
