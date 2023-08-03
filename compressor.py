@@ -29,13 +29,9 @@ def huff_encode(msg):
         hq.heappush(pq, [lo[0] + hi[0]] + lo[1:] + hi[1:])
 
     huff_c = sorted(hq.heappop(pq)[1:], key=lambda p: (len(p[-1]), p))
+    huff_dict = {i[0]: i[1] for i in huff_c}
 
-    enc_msg = ""
-    for c in msg:
-        for item in huff_c:
-            if c == item[0]:
-                enc_msg += item[1]
-                break
+    enc_msg = "".join(huff_dict[c] for c in msg)
 
     # Padding enc_msg to ensure it contains a multiple of 8 bits
     extra_padding = 8 - len(enc_msg) % 8

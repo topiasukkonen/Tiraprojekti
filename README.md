@@ -24,74 +24,48 @@ You can find the program on GitHub. Future iterations of this project may includ
 
 Example results on file sizes given below:
 
-569 kb: 
+550 kb: 
 
+Conducting compression...
 Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.84192985909948%
-Huffman compression took 0.1880629062652588 seconds.
+Huffman reduced the size by 43.84177573411799%
+Huffman compression took 0.06288886070251465 seconds.
 LZW: Compressed equals the original one.
-LZW reduced the size by 8.163301178389627%
-LZW compression took 0.11291384696960449 seconds.
+LZW reduced the size by 8.163448254041912%
+LZW compression took 0.09445500373840332 seconds.
 Passed all tests!
 
 1,1 mb:
 
+Conducting compression...
 Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.841891327752506%
-Huffman compression took 0.36904406547546387 seconds.
+Huffman reduced the size by 43.841852796473276%
+Huffman compression took 0.11240601539611816 seconds.
 LZW: Compressed equals the original one.
-LZW reduced the size by 12.294333487135543%
-LZW compression took 0.22165179252624512 seconds.
+LZW reduced the size by 12.29441056892706%
+LZW compression took 0.19394373893737793 seconds.
 Passed all tests!
 
 2,3 mb:
 
+Conducting compression...
 Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.84192141772054%
-Huffman compression took 0.7337138652801514 seconds.
+Huffman reduced the size by 43.841902152084636%
+Huffman compression took 0.20888972282409668 seconds.
 LZW: Compressed equals the original one.
-LZW reduced the size by 16.037946031314966%
-LZW compression took 0.478085994720459 seconds.
-Passed all tests!
-
-500 kb:
-
-Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.853200834914304%
-Huffman compression took 0.16410613059997559 seconds.
-LZW: Compressed equals the original one.
-LZW reduced the size by 7.3540187182401855%
-LZW compression took 0.09888887405395508 seconds.
-Passed all tests!
-
-400 kb: 
-
-Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.907267198628595%
-Huffman compression took 0.13195419311523438 seconds.
-LZW: Compressed equals the original one.
-LZW reduced the size by 5.015713965021122%
-LZW compression took 0.07528877258300781 seconds.
+LZW reduced the size by 16.037807153460058%
+LZW compression took 0.4244101047515869 seconds.
 Passed all tests!
 
 4,6 mb:
 
+Conducting compression...
 Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.84192141772054%
-Huffman compression took 1.4597809314727783 seconds.
+Huffman reduced the size by 43.841926829857776%
+Huffman compression took 0.417309045791626 seconds.
 LZW: Compressed equals the original one.
-LZW reduced the size by 21.36498842310317%
-LZW compression took 1.0604040622711182 seconds.
-Passed all tests!
-
-6,8 mb
-
-Huffman: Compressed equals the original one.
-Huffman reduced the size by 43.84192964364813%
-Huffman compression took 2.1795170307159424 seconds.
-LZW: Compressed equals the original one.
-LZW reduced the size by 25.35991129287413%
-LZW compression took 1.7601299285888672 seconds.
+LZW reduced the size by 21.365035561190073%
+LZW compression took 0.9491457939147949 seconds.
 Passed all tests!
 
 # Further Documentation
