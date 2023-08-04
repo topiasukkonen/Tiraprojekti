@@ -3,6 +3,39 @@ import time
 import pickle
 from collections import defaultdict as ddict
 
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.endOfString = False
+        self.value = None
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+        self.count = 256
+
+    def insert(self, word):
+        current = self.root
+        for letter in word:
+            node = current.children.get(letter, None)
+            if node is None:
+                node = TrieNode()
+                current.children[letter] = node
+            current = node
+        if current.value is None:
+            current.value = self.count
+            self.count += 1
+        return current.value
+
+    def search(self, word):
+        current = self.root
+        for letter in word:
+            node = current.children.get(letter, None)
+            if node is None:
+                return None
+            current = node
+        return current.value
+
 def read_file(file_path):
     with open(file_path, 'rb') as file:
         return file.read()
@@ -59,40 +92,40 @@ def huff_decode(enc_msg, huff_c, extra_padding):
     return dec_msg
 
 def lzw_encode(msg):
-    dict_size = 256
-    dict_ = {bytes([i]): i for i in range(dict_size)}
+    trie = Trie()
+    dict_ = {bytes([i]): i for i in range(256)}
     s = bytes([msg[0]])
     res = []
     for char in msg[1:]:
         char = bytes([char])
         s_plus_char = s + char
-        if s_plus_char in dict_:
+        if trie.search(s_plus_char) is not None:
             s = s_plus_char
         else:
-            res.append(dict_[s])
-            dict_[s_plus_char] = dict_size
-            dict_size += 1
+            res.append(trie.insert(s))
             s = char
-    res.append(dict_[s])
+    res.append(trie.insert(s))
     return res, dict_
 
 def lzw_decode(comp_msg, dict_):
     inv_dict = {v: k for k, v in dict_.items()}
+    trie = Trie()
+    for k, v in dict_.items():
+        trie.insert(k)
 
     dec_msg = inv_dict[comp_msg[0]]
     s = dec_msg
     for k in comp_msg[1:]:
         if k in inv_dict:
             ent = inv_dict[k]
-        elif k == len(inv_dict):
+        elif k == trie.count:
             ent = s + s[0:1]
         else:
             raise ValueError('Bad compressed k: %s' % k)
         dec_msg += ent
-        inv_dict[len(inv_dict)] = s + ent[0:1]
+        trie.insert(ent)
         s = ent
     return dec_msg
-
 def size_red(orig, comp):
     orig_s = len(orig)
     comp_s = len(comp)
@@ -104,9 +137,9 @@ def check(file_path):
     tst_msg = read_file(file_path)
 
     start_time = time.time()
-    h_enc_msg, h_codes, extra_padding = huff_encode(tst_msg) # Catch extra_padding
+    h_enc_msg, h_codes, extra_padding = huff_encode(tst_msg)
     huffman_time = time.time() - start_time
-    h_dec_msg = huff_decode(h_enc_msg, h_codes, extra_padding) # Pass extra_padding
+    h_dec_msg = huff_decode(h_enc_msg, h_codes, extra_padding) 
     if tst_msg == h_dec_msg:
         print("Huffman: Compressed equals the original one.")
         write_file('packedHuff/compressed.bin', h_enc_msg)
