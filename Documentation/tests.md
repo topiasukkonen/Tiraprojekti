@@ -1,5 +1,53 @@
 ## Testing
 
+### Compressing test results
+
+Example results on file sizes given below:
+
+550 kb: 
+
+Conducting compression...
+Huffman: Compressed equals the original one.
+Huffman reduced the size by 43.84177573411799%
+Huffman compression took 0.06288886070251465 seconds.
+LZW: Compressed equals the original one.
+LZW reduced the size by 8.163448254041912%
+LZW compression took 0.09445500373840332 seconds.
+Passed all tests!
+
+1,1 mb:
+
+Conducting compression...
+Huffman: Compressed equals the original one.
+Huffman reduced the size by 43.841852796473276%
+Huffman compression took 0.11240601539611816 seconds.
+LZW: Compressed equals the original one.
+LZW reduced the size by 12.29441056892706%
+LZW compression took 0.19394373893737793 seconds.
+Passed all tests!
+
+2,3 mb:
+
+Conducting compression...
+Huffman: Compressed equals the original one.
+Huffman reduced the size by 43.841902152084636%
+Huffman compression took 0.20888972282409668 seconds.
+LZW: Compressed equals the original one.
+LZW reduced the size by 16.037807153460058%
+LZW compression took 0.4244101047515869 seconds.
+Passed all tests!
+
+4,6 mb:
+
+Conducting compression...
+Huffman: Compressed equals the original one.
+Huffman reduced the size by 43.841926829857776%
+Huffman compression took 0.417309045791626 seconds.
+LZW: Compressed equals the original one.
+LZW reduced the size by 21.365035561190073%
+LZW compression took 0.9491457939147949 seconds.
+Passed all tests!
+
 ### Introduction
 This document describes the testing process for the Tiraprojekti project. We use the `pytest` framework for creating and running tests, and `pytest-cov` to measure test coverage.
 
