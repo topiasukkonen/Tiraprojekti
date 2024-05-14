@@ -1,16 +1,18 @@
 import pytest
 import os
 import time
-from compressor import read_file, huff_encode, huff_decode, lzw_encode, lzw_decode, size_red
+from ..config import BASE_PATH
+from ..compressor import read_file, huff_encode, huff_decode, lzw_encode, lzw_decode, size_reduction
 
+test_text_path = os.path.join(BASE_PATH, 'texts/text2.txt')
 # Test for reading files
 def test_read_file():
-    data = read_file('testtext.txt')
-    assert data == read_file('testtext.txt')
+    data = read_file(test_text_path)
+    assert data == read_file(test_text_path)
 
 # Test Huffman encoding and decoding with a simple message
 def test_huff_encode_decode():
-    data = read_file('testtext.txt')
+    data = read_file(test_text_path)
     enc_data, huff_c, extra_padding = huff_encode(data)
     assert isinstance(enc_data, bytes)
     assert isinstance(huff_c, list)
@@ -18,17 +20,17 @@ def test_huff_encode_decode():
 
 # Test LZW encoding and decoding with a simple message
 def test_lzw_encode_decode():
-    data = read_file('testtext.txt')
+    data = read_file(test_text_path)
     comp_data, lzw_dict = lzw_encode(data)
     assert isinstance(comp_data, list)
     assert isinstance(lzw_dict, dict)
     assert lzw_decode(comp_data, lzw_dict) == data
 
 # Test size reduction
-def test_size_red():
-    orig = read_file('testtext.txt')
+def test_size_reduction():
+    orig = read_file(test_text_path)
     comp = huff_encode(orig)[0]  # Compressed using Huffman encoding as an example
-    assert isinstance(size_red(orig, comp), float)
+    assert isinstance(size_reduction(orig, comp), float)
 
 # Test Huffman encoding and decoding with different types of data
 @pytest.mark.parametrize('data', [
@@ -60,7 +62,7 @@ def test_with_empty_input():
 
 # Test with large files
 def test_with_large_files():
-    data = os.urandom(1024 * 1024 * 5)  # 5 MB
+    data = os.urandom(1024 * 1024 * 5)  # 0.5 MB
     start = time.time()
     enc_data, huff_c, extra_padding = huff_encode(data)
     assert huff_decode(enc_data, huff_c, extra_padding) == data
@@ -72,7 +74,7 @@ def test_with_large_files():
 
 # Test if the compressed size is smaller than the original size
 def test_compressed_size():
-    data = read_file('testtext.txt')
+    data = read_file(test_text_path)
     huff_comp = huff_encode(data)[0]
     lzw_comp = ''.join(map(str, lzw_encode(data)[0]))
     assert len(huff_comp) < len(data)
