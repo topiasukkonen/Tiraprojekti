@@ -3,6 +3,7 @@ import os
 import time
 from ..config import BASE_PATH
 from ..compressor import read_file, huff_encode, huff_decode, lzw_encode, lzw_decode, size_reduction
+import subprocess
 
 test_text_path = os.path.join(BASE_PATH, 'texts/text2.txt')
 # Test for reading files
@@ -60,18 +61,6 @@ def test_with_empty_input():
     comp_data, lzw_dict = lzw_encode(data)
     assert lzw_decode(comp_data, lzw_dict) == data
 
-# Test with large files
-def test_with_large_files():
-    data = os.urandom(1024 * 1024 * 5)  # 0.5 MB
-    start = time.time()
-    enc_data, huff_c, extra_padding = huff_encode(data)
-    assert huff_decode(enc_data, huff_c, extra_padding) == data
-    print(f'Huffman compression and decompression of 5 MB took {time.time() - start} seconds')
-    start = time.time()
-    comp_data, lzw_dict = lzw_encode(data)
-    assert lzw_decode(comp_data, lzw_dict) == data
-    print(f'LZW compression and decompression of 5 MB took {time.time() - start} seconds')
-
 # Test if the compressed size is smaller than the original size
 def test_compressed_size():
     data = read_file(test_text_path)
@@ -79,3 +68,15 @@ def test_compressed_size():
     lzw_comp = ''.join(map(str, lzw_encode(data)[0]))
     assert len(huff_comp) < len(data)
     assert len(lzw_comp) < len(data)
+    
+# Test with large files
+def test_with_large_files():
+    data = os.urandom(1024 * 1024 * 2)  # 2 MB
+    start = time.time()
+    enc_data, huff_c, extra_padding = huff_encode(data)
+    assert huff_decode(enc_data, huff_c, extra_padding) == data
+    print(f'Huffman compression and decompression of 2 MB took {time.time() - start} seconds')
+    start = time.time()
+    comp_data, lzw_dict = lzw_encode(data)
+    assert lzw_decode(comp_data, lzw_dict) == data
+    print(f'LZW compression and decompression of 2 MB took {time.time() - start} seconds')

@@ -6,7 +6,7 @@ from os import path
 from typing import Tuple, List, Dict, Union
 from .config import BASE_PATH
 
-def read_file(file_path: str, size: int) -> bytes:
+def read_file(file_path: str, size: int = None) -> bytes:
     """Read n-bytes of binary data from a file.
 
     Args:
