@@ -1,1 +1,1 @@
---
+This week I have updated this project I was doing a year ago, which got a bit stuck back then. I have updated the folder structure and made it so that it actually works when running the project. I have also updated documentation, tests and the main program code for a bit. Overall, I have this week spent about 15 hours for this project.
