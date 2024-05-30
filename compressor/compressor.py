@@ -1,10 +1,11 @@
 import heapq as hq
 from time import time
-import pickle
 from collections import defaultdict
 from os import path
 from typing import Tuple, List, Dict, Union
 from .config import BASE_PATH
+import struct
+from typing import List, Tuple, Dict
 
 def read_file(file_path: str, size: int = None) -> bytes:
     """Read n-bytes of binary data from a file.
@@ -27,7 +28,8 @@ def write_file(file_path: str, data: Union[bytes, List[int]]) -> None:
         data (Union[bytes, List[int]]): Data to write to the file.
     """
     with open(file_path, 'wb') as file:
-        pickle.dump(data, file)
+        file.write(data)
+        #pickle.dump(data, file)
 
 def huff_encode(msg: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
     """Encode a message using Huffman coding.
@@ -124,7 +126,35 @@ def lzw_encode(msg: bytes) -> Tuple[List[int], Dict[bytes, int]]:
             dict_size += 1
             s = char
     result.append(dictionary[s])
+    print(dict_size)
     return result, dictionary
+
+def write_compressed_to_file(comp_msg: List[int], file_path: str) -> None:
+    """Write the compressed message to a binary file.
+
+    Args:
+        comp_msg (List[int]): Compressed message.
+        file_path (str): Path to the file where compressed message will be written.
+    """
+    with open(file_path, 'wb') as f:
+        for code in comp_msg:
+            f.write(struct.pack('>I', code))
+
+def read_compressed_from_file(file_path: str) -> List[int]:
+    """Read the compressed message from a binary file.
+
+    Args:
+        file_path (str): Path to the file containing the compressed message.
+
+    Returns:
+        List[int]: Compressed message.
+    """
+    comp_msg = []
+    with open(file_path, 'rb') as f:
+        while (chunk := f.read(4)):
+            comp_msg.append(struct.unpack('>I', chunk)[0])
+    return comp_msg
+
 
 def lzw_decode(comp_msg: List[int], dictionary: Dict[bytes, int]) -> bytes:
     """Decode a LZW compressed message.
@@ -205,12 +235,13 @@ def check(file_path: str) -> None:
 
             h_dec_msg = huff_decode(h_enc_msg, h_codes, extra_padding)
             if tst_msg == h_dec_msg:
+                print("Huffman decoding successful!")
                 write_file(path.join(BASE_PATH, 'packedHuff/compressed.bin'), h_enc_msg)
             else:
                 raise ValueError("Huffman decoding failed!")
 
             print_compression_results("Huffman", tst_msg, h_enc_msg, huffman_time, file)
-
+            
             # LZW compression
             start_time = time()
             lzw_comp_msg, lzw_dict = lzw_encode(tst_msg)
@@ -218,13 +249,17 @@ def check(file_path: str) -> None:
 
             lzw_dec_msg = lzw_decode(lzw_comp_msg, lzw_dict)
             if tst_msg == lzw_dec_msg:
-                write_file(path.join(BASE_PATH, 'packedLZW/compressed.bin'), lzw_comp_msg)
+                print("LZW decoding successful!")
+                write_compressed_to_file(lzw_comp_msg, path.join(BASE_PATH, 'packedLZW/compressed.bin'))
+                #write_file(path.join(BASE_PATH, 'packedLZW/compressed.bin'), lzw_comp_msg)
             else:
                 raise ValueError("LZW decoding failed!")
 
-            lzw_comp_bytes = pickle.dumps(lzw_comp_msg)
+            with open(path.join(BASE_PATH, 'packedLZW/compressed.bin'), 'rb') as f:
+                lzw_comp_bytes = f.read()
+    
             print_compression_results("LZW", tst_msg, lzw_comp_bytes, lzw_time, file)
 
             file.write('\n'+ '-'*10 +'\n')
-
+            
             size *= 2

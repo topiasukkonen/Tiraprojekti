@@ -3,7 +3,6 @@ import os
 import time
 from ..config import BASE_PATH
 from ..compressor import read_file, huff_encode, huff_decode, lzw_encode, lzw_decode, size_reduction
-import subprocess
 
 test_text_path = os.path.join(BASE_PATH, 'texts/text2.txt')
 # Test for reading files
