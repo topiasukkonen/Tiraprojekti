@@ -1,1 +1,1 @@
-Have not done that much this week. Mostly been checking the functionality of the program and trying to figure what should possibly be additionally done to the project. Created initial release. overall, maybe a couple of hpurs spent this week on the project.
+Have not done that much this week. Mostly been checking the functionality of the program and trying to figure what should possibly be additionally done to the project. Created initial release. Overall, maybe a couple of hours spent this week on the project.

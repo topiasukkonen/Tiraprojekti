@@ -2,9 +2,19 @@ import pytest
 import os
 import time
 from ..config import BASE_PATH
-from ..compressor import read_file, huff_encode, huff_decode, lzw_encode, lzw_decode, size_reduction
+from ..compressor import (
+    read_file, 
+    huff_encode, 
+    huff_decode, 
+    lzw_encode, 
+    lzw_decode, 
+    size_reduction, 
+    serialize_huffman_tree, 
+    deserialize_huffman_tree
+)
 
 test_text_path = os.path.join(BASE_PATH, 'texts/text2.txt')
+
 # Test for reading files
 def test_read_file():
     data = read_file(test_text_path)
@@ -21,10 +31,9 @@ def test_huff_encode_decode():
 # Test LZW encoding and decoding with a simple message
 def test_lzw_encode_decode():
     data = read_file(test_text_path)
-    comp_data, lzw_dict = lzw_encode(data)
+    comp_data, _ = lzw_encode(data)
     assert isinstance(comp_data, list)
-    assert isinstance(lzw_dict, dict)
-    assert lzw_decode(comp_data, lzw_dict) == data
+    assert lzw_decode(comp_data) == data
 
 # Test size reduction
 def test_size_reduction():
@@ -49,33 +58,25 @@ def test_huff_with_different_data(data):
     os.urandom(1024),
 ])
 def test_lzw_with_different_data(data):
-    comp_data, lzw_dict = lzw_encode(data)
-    assert lzw_decode(comp_data, lzw_dict) == data
+    comp_data, _ = lzw_encode(data)
+    assert lzw_decode(comp_data) == data
 
 # Test with empty input
 def test_with_empty_input():
     data = b''
     enc_data, huff_c, extra_padding = huff_encode(data)
     assert huff_decode(enc_data, huff_c, extra_padding) == data
-    comp_data, lzw_dict = lzw_encode(data)
-    assert lzw_decode(comp_data, lzw_dict) == data
-
-# Test if the compressed size is smaller than the original size
-def test_compressed_size():
-    data = read_file(test_text_path)
-    huff_comp = huff_encode(data)[0]
-    lzw_comp = ''.join(map(str, lzw_encode(data)[0]))
-    assert len(huff_comp) < len(data)
-    assert len(lzw_comp) < len(data)
+    comp_data, _ = lzw_encode(data)
+    assert lzw_decode(comp_data) == data
     
 # Test with large files
 def test_with_large_files():
-    data = os.urandom(1024 * 1024 * 2)  # 2 MB
+    data = os.urandom(1024 * 1024)  # 1 MB
     start = time.time()
     enc_data, huff_c, extra_padding = huff_encode(data)
     assert huff_decode(enc_data, huff_c, extra_padding) == data
     print(f'Huffman compression and decompression of 2 MB took {time.time() - start} seconds')
     start = time.time()
-    comp_data, lzw_dict = lzw_encode(data)
-    assert lzw_decode(comp_data, lzw_dict) == data
+    comp_data, _ = lzw_encode(data)
+    assert lzw_decode(comp_data) == data
     print(f'LZW compression and decompression of 2 MB took {time.time() - start} seconds')

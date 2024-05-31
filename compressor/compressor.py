@@ -4,6 +4,18 @@ from collections import defaultdict
 from os import path
 from typing import Tuple, List, Dict, Union
 from .config import BASE_PATH
+import pickle
+
+def serialize_huffman_tree(tree: List[Tuple[int, str]], file_path: str) -> None:
+    """Serialize and save the Huffman tree to a file."""
+    with open(file_path, 'wb') as file:
+        pickle.dump(tree, file)
+
+def deserialize_huffman_tree(file_path: str) -> List[Tuple[int, str]]:
+    """Deserialize and load the Huffman tree from a file."""
+    with open(file_path, 'rb') as file:
+        return pickle.load(file)
+
 
 def read_file(file_path: str, size: int = None) -> bytes:
     """Read n-bytes of binary data from a file.
@@ -69,6 +81,7 @@ def huff_encode(msg: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
 
     return enc_msg, huff_c, extra_padding
 
+
 def huff_decode(enc_msg: bytes, huff_c: List[Tuple[int, str]], extra_padding: int) -> bytes:
     """Decode a Huffman encoded message.
 
@@ -96,6 +109,7 @@ def huff_decode(enc_msg: bytes, huff_c: List[Tuple[int, str]], extra_padding: in
             dec_msg.append(inv_huff_c[temp])
             temp = ""
     return bytes(dec_msg)
+
 
 def lzw_encode(msg: bytes, max_dict_size: int = 4096) -> Tuple[List[int], Dict[bytes, int]]:
     """Encode a message using LZW compression with a capped dictionary size.
@@ -224,7 +238,7 @@ def size_reduction(original: bytes, compressed: bytes) -> float:
     """
     return len(compressed) / len(original) * 100
 
-def print_compression_results(method: str, original: bytes, compressed: bytes, time_taken: float, file) -> None:
+def print_compression_results(method: str, original: bytes, compressed: bytes, time_taken: float, file, additional_size: int = 0) -> None:
     """Print and log the results of the compression method.
 
     Args:
@@ -233,11 +247,14 @@ def print_compression_results(method: str, original: bytes, compressed: bytes, t
         compressed (bytes): Compressed message.
         time_taken (float): Time taken for compression.
         file: File object to log the results.
+        additional_size (int): Size of additional metadata (e.g., Huffman tree).
     """
-    reduction = size_reduction(original, compressed)
+    compressed_size = len(compressed) + additional_size
+    reduction = compressed_size / len(original) * 100
     result_str = f"{method} compression is {reduction:.2f}% of the original size.\n{method} compression took {time_taken:.4f} seconds.\n"
     print(result_str)
     file.write(result_str)
+
 def check(file_path: str) -> None:
     """Conduct compression tests on a file.
 
@@ -259,6 +276,9 @@ def check(file_path: str) -> None:
             h_enc_msg, h_codes, extra_padding = huff_encode(tst_msg)
             huffman_time = time() - start_time
 
+            huff_tree_path = path.join(BASE_PATH, 'packedHuff/huffman_tree.pkl')
+            serialize_huffman_tree(h_codes, huff_tree_path)
+
             h_dec_msg = huff_decode(h_enc_msg, h_codes, extra_padding)
             if tst_msg == h_dec_msg:
                 print("Huffman decoding successful!")
@@ -266,10 +286,15 @@ def check(file_path: str) -> None:
                 text_file_path = path.join(BASE_PATH, 'packedHuff/decoded.txt')
                 with open(text_file_path, 'w') as txt_file:
                     txt_file.write(h_dec_msg.decode(errors='ignore'))
+
+                # Calculate total compressed size including Huffman tree
+                compressed_size = len(h_enc_msg)
+                huff_tree_size = path.getsize(huff_tree_path)
+                total_compressed_size = compressed_size + huff_tree_size
             else:
                 raise ValueError("Huffman decoding failed!")
 
-            print_compression_results("Huffman", tst_msg, h_enc_msg, huffman_time, file)
+            print_compression_results("Huffman", tst_msg, h_enc_msg, huffman_time, file, additional_size=huff_tree_size)
             
             # LZW compression
             start_time = time()
