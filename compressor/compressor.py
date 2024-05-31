@@ -4,8 +4,6 @@ from collections import defaultdict
 from os import path
 from typing import Tuple, List, Dict, Union
 from .config import BASE_PATH
-import struct
-from typing import List, Tuple, Dict
 
 def read_file(file_path: str, size: int = None) -> bytes:
     """Read n-bytes of binary data from a file.
@@ -22,7 +20,7 @@ def read_file(file_path: str, size: int = None) -> bytes:
 
 def write_file(file_path: str, data: Union[bytes, List[int]]) -> None:
     """Write binary data to a file.
-
+a
     Args:
         file_path (str): Path to the file.
         data (Union[bytes, List[int]]): Data to write to the file.
@@ -99,11 +97,12 @@ def huff_decode(enc_msg: bytes, huff_c: List[Tuple[int, str]], extra_padding: in
             temp = ""
     return bytes(dec_msg)
 
-def lzw_encode(msg: bytes) -> Tuple[List[int], Dict[bytes, int]]:
-    """Encode a message using LZW compression.
+def lzw_encode(msg: bytes, max_dict_size: int = 4096) -> Tuple[List[int], Dict[bytes, int]]:
+    """Encode a message using LZW compression with a capped dictionary size.
 
     Args:
         msg (bytes): The message to encode.
+        max_dict_size (int): Maximum dictionary size.
 
     Returns:
         Tuple[List[int], Dict[bytes, int]]: Encoded message and dictionary used for encoding.
@@ -122,46 +121,26 @@ def lzw_encode(msg: bytes) -> Tuple[List[int], Dict[bytes, int]]:
             s = s_plus_char
         else:
             result.append(dictionary[s])
-            dictionary[s_plus_char] = dict_size
-            dict_size += 1
+            if dict_size < max_dict_size:
+                dictionary[s_plus_char] = dict_size
+                dict_size += 1
+            else:
+                dictionary = {bytes([i]): i for i in range(256)}
+                dict_size = 256
+                dictionary[s_plus_char] = dict_size
+                dict_size += 1
             s = char
     result.append(dictionary[s])
-    print(dict_size)
     return result, dictionary
 
-def write_compressed_to_file(comp_msg: List[int], file_path: str) -> None:
-    """Write the compressed message to a binary file.
-
-    Args:
-        comp_msg (List[int]): Compressed message.
-        file_path (str): Path to the file where compressed message will be written.
-    """
-    with open(file_path, 'wb') as f:
-        for code in comp_msg:
-            f.write(struct.pack('>I', code))
-
-def read_compressed_from_file(file_path: str) -> List[int]:
-    """Read the compressed message from a binary file.
-
-    Args:
-        file_path (str): Path to the file containing the compressed message.
-
-    Returns:
-        List[int]: Compressed message.
-    """
-    comp_msg = []
-    with open(file_path, 'rb') as f:
-        while (chunk := f.read(4)):
-            comp_msg.append(struct.unpack('>I', chunk)[0])
-    return comp_msg
 
 
-def lzw_decode(comp_msg: List[int], dictionary: Dict[bytes, int]) -> bytes:
+def lzw_decode(comp_msg: List[int], max_dict_size: int = 4096) -> bytes:
     """Decode a LZW compressed message.
 
     Args:
         comp_msg (List[int]): Compressed message.
-        dictionary (Dict[bytes, int]): Dictionary used for encoding.
+        max_dict_size (int): Maximum dictionary size.
 
     Returns:
         bytes: Decoded message.
@@ -169,7 +148,8 @@ def lzw_decode(comp_msg: List[int], dictionary: Dict[bytes, int]) -> bytes:
     if not comp_msg:
         return b''
 
-    inv_dict = {v: k for k, v in dictionary.items()}
+    dict_size = 256
+    inv_dict = {i: bytes([i]) for i in range(dict_size)}
 
     dec_msg = inv_dict[comp_msg[0]]
     s = dec_msg
@@ -181,9 +161,56 @@ def lzw_decode(comp_msg: List[int], dictionary: Dict[bytes, int]) -> bytes:
         else:
             raise ValueError(f'Bad compressed k: {k}')
         dec_msg += entry
-        inv_dict[len(inv_dict)] = s + entry[0:1]
+        if len(inv_dict) < max_dict_size:
+            inv_dict[dict_size] = s + entry[0:1]
+            dict_size += 1
+        else:
+            inv_dict = {i: bytes([i]) for i in range(256)}
+            dict_size = 256
+            inv_dict[dict_size] = s + entry[0:1]
+            dict_size += 1
         s = entry
     return dec_msg
+
+
+
+def write_compressed_to_file(comp_msg: List[int], file_path: str) -> None:
+    """Write the compressed message to a binary file.
+
+    Args:
+        comp_msg (List[int]): Compressed message.
+        file_path (str): Path to the file where compressed message will be written.
+    """
+    # Convert the list of codes to a bit string
+    bit_string = ''.join(format(code, '012b') for code in comp_msg)
+    byte_array = bytearray()
+
+    # Convert the bit string to bytes
+    for i in range(0, len(bit_string), 8):
+        byte_array.append(int(bit_string[i:i+8], 2))
+
+    with open(file_path, 'wb') as f:
+        f.write(byte_array)
+
+def read_compressed_from_file(file_path: str) -> List[int]:
+    """Read the compressed message from a binary file.
+
+    Args:
+        file_path (str): Path to the file containing the compressed message.
+
+    Returns:
+        List[int]: Compressed message.
+    """
+    with open(file_path, 'rb') as f:
+        byte_array = f.read()
+
+    # Convert the bytes back to a bit string
+    bit_string = ''.join(format(byte, '08b') for byte in byte_array)
+    
+    # Extract 12-bit codes from the bit string
+    comp_msg = [int(bit_string[i:i+12], 2) for i in range(0, len(bit_string), 12) if i + 12 <= len(bit_string)]
+
+    return comp_msg
 
 def size_reduction(original: bytes, compressed: bytes) -> float:
     """Calculate the size reduction percentage.
@@ -195,7 +222,7 @@ def size_reduction(original: bytes, compressed: bytes) -> float:
     Returns:
         float: Size reduction percentage.
     """
-    return (len(original) - len(compressed)) / len(original) * 100
+    return len(compressed) / len(original) * 100
 
 def print_compression_results(method: str, original: bytes, compressed: bytes, time_taken: float, file) -> None:
     """Print and log the results of the compression method.
@@ -208,10 +235,9 @@ def print_compression_results(method: str, original: bytes, compressed: bytes, t
         file: File object to log the results.
     """
     reduction = size_reduction(original, compressed)
-    result_str = f"{method} reduced the size by {reduction:.2f}%\n{method} compression took {time_taken:.4f} seconds.\n"
+    result_str = f"{method} compression is {reduction:.2f}% of the original size.\n{method} compression took {time_taken:.4f} seconds.\n"
     print(result_str)
     file.write(result_str)
-
 def check(file_path: str) -> None:
     """Conduct compression tests on a file.
 
@@ -237,6 +263,9 @@ def check(file_path: str) -> None:
             if tst_msg == h_dec_msg:
                 print("Huffman decoding successful!")
                 write_file(path.join(BASE_PATH, 'packedHuff/compressed.bin'), h_enc_msg)
+                text_file_path = path.join(BASE_PATH, 'packedHuff/decoded.txt')
+                with open(text_file_path, 'w') as txt_file:
+                    txt_file.write(h_dec_msg.decode(errors='ignore'))
             else:
                 raise ValueError("Huffman decoding failed!")
 
@@ -247,11 +276,15 @@ def check(file_path: str) -> None:
             lzw_comp_msg, lzw_dict = lzw_encode(tst_msg)
             lzw_time = time() - start_time
 
-            lzw_dec_msg = lzw_decode(lzw_comp_msg, lzw_dict)
+            lzw_dec_msg = lzw_decode(lzw_comp_msg, max_dict_size=4096)
             if tst_msg == lzw_dec_msg:
                 print("LZW decoding successful!")
                 write_compressed_to_file(lzw_comp_msg, path.join(BASE_PATH, 'packedLZW/compressed.bin'))
-                #write_file(path.join(BASE_PATH, 'packedLZW/compressed.bin'), lzw_comp_msg)
+
+                # Save the decoded LZW message to a text file
+                text_file_path = path.join(BASE_PATH, 'packedLZW/decoded.txt')
+                with open(text_file_path, 'w') as txt_file:
+                    txt_file.write(lzw_dec_msg.decode(errors='ignore'))
             else:
                 raise ValueError("LZW decoding failed!")
 
