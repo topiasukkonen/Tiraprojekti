@@ -1,0 +1,1 @@
+This week I have done changes to the efficiency of the LZW. Also, I have modified the Huffman to separately save the tree structure. Other changes I have done have been updating the documentation and tests. Overall, have spent approximately 15 hours for all of these changes.
