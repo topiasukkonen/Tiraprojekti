@@ -1,0 +1,1 @@
+For this week, have not had time to move the project forward that much. I have only run some functional tests by using the program itself to make sure the previous weeks updates work. Spent maybe 2 hours for this this week. 
