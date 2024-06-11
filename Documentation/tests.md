@@ -44,17 +44,6 @@ Use the following command to run the tests with coverage:
 pytest --cov=compressor
 ```
 
-Test coverage results
+### Test coverage results
 
-compressor/tests/test_compressor.py ............                                                                                                                                                                            [100%]
-
----------- coverage: platform darwin, python 3.10.6-final-0 ----------
-Name                                  Stmts   Miss  Cover
----------------------------------------------------------
-compressor/__init__.py                    0      0   100%
-compressor/compressor.py                165     64    61%
-compressor/config.py                      2      0   100%
-compressor/tests/__init__.py              0      0   100%
-compressor/tests/test_compressor.py      48      0   100%
----------------------------------------------------------
-TOTAL                                   215     64    70%
+- [Coverage](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/testCoverage.jpeg)
