@@ -6,19 +6,23 @@ Two different algorithms were utilized for the compression task: Huffman Encodin
 
 Heaps and dictionaries are the primary data structures used throughout this project.
 
-The Python script accepts a text file as an input, performs Huffman and LZW encoding methods to compress the file, and subsequently decompresses the data back to the original form. This showcases the lossless nature of these compression techniques.
+The Python script accepts a text file as an input, performs Huffman and LZW encoding methods to compress the file, and subsequently decompresses the data back to the original form. This showcases the lossless nature of these compression techniques. User can choose to use given testtext.txt as a compression file, or give his/her own text file. The program then runs compressions from 2 byte size up to the size the user wants (see compressor.py code documentation for MAX_SIZE variable).
 
-To assess the robustness and correctness of the algorithms, a suite of tests is included in the script. These tests ensure that the original text data is equivalent to the decompressed data following compression and decompression - a critical check for any compression-decompression system.
+To assess the robustness and correctness of the algorithms, a suite of tests is included in the script. These tests ensure that the original text data is equivalent to the decompressed data following compression and decompression.
 
 In addition to the compression-decompression process, the program also provides information about the effectiveness of the compression. It calculates and outputs the percentage reduction in text data size achieved by the Huffman and LZW algorithms. Also, time taken by each algorithm is provided to the user.
 
+After compressions, decoded text files in tandem with compressed binary files are provided on the packedLZW and packedHuff folders to assure data losslessness. For Huffman, tree structure is provided on a separate file. 
+
 Here's how you can run the program:
 
-1. Ensure Python is installed on your system.
+1. Ensure Python and Poetry are installed on your system.
 2. Download the source code.
 3. Open the command line and navigate to the directory containing the program.
-4. Run the program using the command 'python3 main.py text_file_path', replacing 'text_file_path' with the path to your text file.
-5. The program will run some tests automatically, providing validation for the implemented algorithms.
+4. Install dependencies by running: poetry install.
+5. Run the program using the command 'python3 main.py text_file_path', replacing 'text_file_path' with the path to your text file. Use path to testtext.txt to run compressions on Kalevala text.
+6. The program will run some tests automatically on the fly (including the data losslessness checks on both algorithms), providing validation for the implemented algorithms. Compression size results as well as time taken for compression is printed on the command line and also saved to results.txt.
+7. Please see Tests documentation for information on running tests.
 
 # Further Documentation
 
@@ -26,10 +30,3 @@ Here's how you can run the program:
 - [Spesifications](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/specs.md)
 - [Tests](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/tests.md)
 - [User Guide](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/userguide.md)
-
-**References:**
-
-- Python Language Reference, version 3.7. Available at http://www.python.org
-- "Introduction to Algorithms", by Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein.
-- Wikipedia articles on [Huffman coding](https://en.wikipedia.org/wiki/Huffman_coding) and [LZW](https://en.wikipedia.org/wiki/Lempel–Ziv–Welch).
-- Geeks for Geeks articles on [Huffman coding](https://www.geeksforgeeks.org/huffman-coding-greedy-algo-3/) and [LZW](https://www.geeksforgeeks.org/lzw-lempel-ziv-welch-compression-technique/).

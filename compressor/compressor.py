@@ -260,8 +260,10 @@ def check(file_path: str) -> None:
 
     Args:
         file_path (str): Path to the file to be tested.
+        
+    Alter MAX_SIZE to test with file sizes of your choice.
     """
-    MAX_SIZE = 1024 * 1024 * 5  # 5 MB
+    MAX_SIZE = 1024 * 1024 * 2.1  # 2 MB
     size = 2
     results_file = path.join(BASE_PATH, 'results.txt')
 
@@ -271,7 +273,7 @@ def check(file_path: str) -> None:
             print(f"Compressing {len(tst_msg)} bytes ({len(tst_msg) / 1024:.2f} KB, {len(tst_msg) / 1024 / 1024:.2f} MB)")
             file.write(f"Compressing {len(tst_msg)} bytes ({len(tst_msg) / 1024:.2f} KB, {len(tst_msg) / 1024 / 1024:.2f} MB)\n")
 
-            # Huffman compression
+            # Huffman
             start_time = time()
             h_enc_msg, h_codes, extra_padding = huff_encode(tst_msg)
             huffman_time = time() - start_time
@@ -287,7 +289,7 @@ def check(file_path: str) -> None:
                 with open(text_file_path, 'w') as txt_file:
                     txt_file.write(h_dec_msg.decode(errors='ignore'))
 
-                # Calculate total compressed size including Huffman tree
+                # Calculate compressed size
                 compressed_size = len(h_enc_msg)
                 huff_tree_size = path.getsize(huff_tree_path)
                 total_compressed_size = compressed_size + huff_tree_size
@@ -306,7 +308,7 @@ def check(file_path: str) -> None:
                 print("LZW decoding successful!")
                 write_compressed_to_file(lzw_comp_msg, path.join(BASE_PATH, 'packedLZW/compressed.bin'))
 
-                # Save the decoded LZW message to a text file
+                # Save the decoded LZW message
                 text_file_path = path.join(BASE_PATH, 'packedLZW/decoded.txt')
                 with open(text_file_path, 'w') as txt_file:
                     txt_file.write(lzw_dec_msg.decode(errors='ignore'))
