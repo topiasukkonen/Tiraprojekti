@@ -41,75 +41,85 @@ a
         file.write(data)
         #pickle.dump(data, file)
 
-def huff_encode(msg: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
-    """Encode a message using Huffman coding.
+def huff_encode(input: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
+    """Encode using Huffman coding.
 
     Args:
-        msg (bytes): The message to encode.
+        input (bytes): The input to encode.
 
     Returns:
-        Tuple[bytes, List[Tuple[int, str]], int]: Encoded message, Huffman codes, and extra padding length.
+        Tuple[bytes, List[Tuple[int, str]], int]: Encoded input, Huffman codes, and extra padding length.
     """
-    if not msg:
+    if not input:
         return b'', [], 0
 
-    freqs = defaultdict(int)
-    for c in msg:
-        freqs[c] += 1
+    # Calculate frequency of each byte
+    freq_dict = defaultdict(int)
+    for byte in input:
+        freq_dict[byte] += 1
 
-    pq = [[weight, [sym, ""]] for sym, weight in freqs.items()]
-    hq.heapify(pq)
+    # Create queue with initial frequencies
+    heap = [[weight, [symbol, ""]] for symbol, weight in freq_dict.items()]
+    hq.heapify(heap)
 
-    while len(pq) > 1:
-        lo = hq.heappop(pq)
-        hi = hq.heappop(pq)
-        for pair in lo[1:]:
+    # Build the Huffman Tree
+    while len(heap) > 1:
+        low = hq.heappop(heap)
+        high = hq.heappop(heap)
+        for pair in low[1:]:
             pair[1] = '0' + pair[1]
-        for pair in hi[1:]:
+        for pair in high[1:]:
             pair[1] = '1' + pair[1]
-        hq.heappush(pq, [lo[0] + hi[0]] + lo[1:] + hi[1:])
+        hq.heappush(heap, [low[0] + high[0]] + low[1:] + high[1:])
 
-    huff_c = sorted(hq.heappop(pq)[1:], key=lambda p: (len(p[-1]), p))
-    huff_dict = {symbol: code for symbol, code in huff_c}
+    # Extract Huffman codes
+    huffman_codes = sorted(hq.heappop(heap)[1:], key=lambda p: (len(p[-1]), p))
+    code_dict = {symbol: code for symbol, code in huffman_codes}
 
-    enc_msg = ''.join(huff_dict[c] for c in msg)
+    # Encode the input message
+    encoded_str = ''.join(code_dict[byte] for byte in input)
 
-    extra_padding = 8 - len(enc_msg) % 8
-    enc_msg += '0' * extra_padding
+    # Add padding to make the length a multiple of 8
+    padding_length = 8 - len(encoded_str) % 8
+    encoded_str += '0' * padding_length
 
-    enc_msg = int(enc_msg, 2).to_bytes((len(enc_msg) + 7) // 8, byteorder='big')
+    # Convert the encoded input to bytes
+    encoded_bytes = int(encoded_str, 2).to_bytes((len(encoded_str) + 7) // 8, byteorder='big')
 
-    return enc_msg, huff_c, extra_padding
+    return encoded_bytes, huffman_codes, padding_length
 
-
-def huff_decode(enc_msg: bytes, huff_c: List[Tuple[int, str]], extra_padding: int) -> bytes:
-    """Decode a Huffman encoded message.
+def huff_decode(encoded_bytes: bytes, huffman_codes: List[Tuple[int, str]], padding_length: int) -> bytes:
+    """Decode a Huffman encoded input.
 
     Args:
-        enc_msg (bytes): Encoded message.
-        huff_c (List[Tuple[int, str]]): Huffman codes.
-        extra_padding (int): Extra padding length.
+        encoded_bytes (bytes): Encoded input.
+        huffman_codes (List[Tuple[int, str]]): Huffman codes.
+        padding_length (int): Extra padding length.
 
     Returns:
-        bytes: Decoded message.
+        bytes: Decoded input.
     """
-    if not enc_msg or not huff_c:
+    if not encoded_bytes or not huffman_codes:
         return b''
 
-    inv_huff_c = {code: symbol for symbol, code in huff_c}
+    # Create a dictionary to map codes back to symbols
+    inverse_codes = {code: symbol for symbol, code in huffman_codes}
 
-    enc_msg = bin(int.from_bytes(enc_msg, byteorder='big'))[2:].zfill(len(enc_msg) * 8)
-    enc_msg = enc_msg[:-extra_padding]
+    # Convert the encoded input message bytes to a binary string
+    binary_str = bin(int.from_bytes(encoded_bytes, byteorder='big'))[2:].zfill(len(encoded_bytes) * 8)
+    # Remove the padding
+    binary_str = binary_str[:-padding_length]
 
-    dec_msg = bytearray()
-    temp = ""
-    for bit in enc_msg:
-        temp += bit
-        if temp in inv_huff_c:
-            dec_msg.append(inv_huff_c[temp])
-            temp = ""
-    return bytes(dec_msg)
+    # Decode the binary string
+    decoded_input = bytearray()
+    temp_code = ""
+    for bit in binary_str:
+        temp_code += bit
+        if temp_code in inverse_codes:
+            decoded_input.append(inverse_codes[temp_code])
+            temp_code = ""
 
+    return bytes(decoded_input)
 
 def lzw_encode(msg: bytes, max_dict_size: int = 4096) -> Tuple[List[int], Dict[bytes, int]]:
     """Encode a message using LZW compression with a capped dictionary size.
@@ -243,8 +253,8 @@ def print_compression_results(method: str, original: bytes, compressed: bytes, t
 
     Args:
         method (str): Compression method name.
-        original (bytes): Original message.
-        compressed (bytes): Compressed message.
+        original (bytes): Original.
+        compressed (bytes): Compressed.
         time_taken (float): Time taken for compression.
         file: File object to log the results.
         additional_size (int): Size of additional metadata (e.g., Huffman tree).
@@ -308,7 +318,7 @@ def check(file_path: str) -> None:
                 print("LZW decoding successful!")
                 write_compressed_to_file(lzw_comp_msg, path.join(BASE_PATH, 'packedLZW/compressed.bin'))
 
-                # Save the decoded LZW message
+                # Save the decoded LZW input message
                 text_file_path = path.join(BASE_PATH, 'packedLZW/decoded.txt')
                 with open(text_file_path, 'w') as txt_file:
                     txt_file.write(lzw_dec_msg.decode(errors='ignore'))
