@@ -46,4 +46,4 @@ pytest --cov=compressor
 
 ### Test coverage results
 
-- [Coverage](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/testCoverage.jpeg)
+![Alt text](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/testCoverage.jpeg)
