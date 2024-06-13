@@ -121,81 +121,85 @@ def huff_decode(encoded_bytes: bytes, huffman_codes: List[Tuple[int, str]], padd
 
     return bytes(decoded_input)
 
-def lzw_encode(msg: bytes, max_dict_size: int = 4096) -> Tuple[List[int], Dict[bytes, int]]:
-    """Encode a message using LZW compression with a capped dictionary size.
+def lzw_encode(input_data: bytes, max_dict_size: int = 4096) -> Tuple[List[int], Dict[bytes, int]]:
+    """Encode an input using LZW compression with a capped dictionary size.
 
     Args:
-        msg (bytes): The message to encode.
+        input_data (bytes): The input to encode.
         max_dict_size (int): Maximum dictionary size.
 
     Returns:
-        Tuple[List[int], Dict[bytes, int]]: Encoded message and dictionary used for encoding.
+        Tuple[List[int], Dict[bytes, int]]: Encoded input and dictionary used for encoding.
     """
-    if not msg:
+    if not input_data:
         return [], {}
 
     dict_size = 256
     dictionary = {bytes([i]): i for i in range(dict_size)}
-    s = bytes([msg[0]])
-    result = []
-    for char in msg[1:]:
-        char = bytes([char])
-        s_plus_char = s + char
-        if s_plus_char in dictionary:
-            s = s_plus_char
+    current_sequence = bytes([input_data[0]])
+    encoded_output = []
+    
+    for byte in input_data[1:]:
+        byte = bytes([byte])
+        combined_sequence = current_sequence + byte
+        
+        if combined_sequence in dictionary:
+            current_sequence = combined_sequence
         else:
-            result.append(dictionary[s])
+            encoded_output.append(dictionary[current_sequence])
             if dict_size < max_dict_size:
-                dictionary[s_plus_char] = dict_size
+                dictionary[combined_sequence] = dict_size
                 dict_size += 1
             else:
                 dictionary = {bytes([i]): i for i in range(256)}
                 dict_size = 256
-                dictionary[s_plus_char] = dict_size
+                dictionary[combined_sequence] = dict_size
                 dict_size += 1
-            s = char
-    result.append(dictionary[s])
-    return result, dictionary
+            current_sequence = byte
+            
+    encoded_output.append(dictionary[current_sequence])
+    return encoded_output, dictionary
 
-
-
-def lzw_decode(comp_msg: List[int], max_dict_size: int = 4096) -> bytes:
-    """Decode a LZW compressed message.
+def lzw_decode(encoded_input: List[int], max_dict_size: int = 4096) -> bytes:
+    """Decode a LZW compressed input.
 
     Args:
-        comp_msg (List[int]): Compressed message.
+        encoded_input (List[int]): Compressed input.
         max_dict_size (int): Maximum dictionary size.
 
     Returns:
-        bytes: Decoded message.
+        bytes: Decoded input.
     """
-    if not comp_msg:
+    if not encoded_input:
         return b''
 
     dict_size = 256
-    inv_dict = {i: bytes([i]) for i in range(dict_size)}
-
-    dec_msg = inv_dict[comp_msg[0]]
-    s = dec_msg
-    for k in comp_msg[1:]:
-        if k in inv_dict:
-            entry = inv_dict[k]
-        elif k == len(inv_dict):
-            entry = s + s[0:1]
+    reverse_dictionary = {i: bytes([i]) for i in range(dict_size)}
+    decoded_output = reverse_dictionary[encoded_input[0]]
+    previous_sequence = decoded_output
+    
+    for code in encoded_input[1:]:
+        if code in reverse_dictionary:
+            current_sequence = reverse_dictionary[code]
+        elif code == len(reverse_dictionary):
+            current_sequence = previous_sequence + previous_sequence[0:1]
         else:
-            raise ValueError(f'Bad compressed k: {k}')
-        dec_msg += entry
-        if len(inv_dict) < max_dict_size:
-            inv_dict[dict_size] = s + entry[0:1]
+            raise ValueError(f'Bad compressed code: {code}')
+        
+        decoded_output += current_sequence
+        
+        if len(reverse_dictionary) < max_dict_size:
+            reverse_dictionary[dict_size] = previous_sequence + current_sequence[0:1]
             dict_size += 1
         else:
-            inv_dict = {i: bytes([i]) for i in range(256)}
+            reverse_dictionary = {i: bytes([i]) for i in range(256)}
             dict_size = 256
-            inv_dict[dict_size] = s + entry[0:1]
+            reverse_dictionary[dict_size] = previous_sequence + current_sequence[0:1]
             dict_size += 1
-        s = entry
-    return dec_msg
-
+            
+        previous_sequence = current_sequence
+    
+    return decoded_output
 
 
 def write_compressed_to_file(comp_msg: List[int], file_path: str) -> None:

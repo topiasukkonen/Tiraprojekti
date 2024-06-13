@@ -2,7 +2,7 @@ Compressing 2 bytes (0.00 KB, 0.00 MB)
 Huffman compression is 1850.00% of the original size.
 Huffman compression took 0.0000 seconds.
 LZW compression is 150.00% of the original size.
-LZW compression took 0.0000 seconds.
+LZW compression took 0.0001 seconds.
 
 ----------
 Compressing 4 bytes (0.00 KB, 0.00 MB)
@@ -28,9 +28,9 @@ LZW compression took 0.0000 seconds.
 ----------
 Compressing 32 bytes (0.03 KB, 0.00 MB)
 Huffman compression is 853.12% of the original size.
-Huffman compression took 0.0000 seconds.
+Huffman compression took 0.0001 seconds.
 LZW compression is 146.88% of the original size.
-LZW compression took 0.0000 seconds.
+LZW compression took 0.0006 seconds.
 
 ----------
 Compressing 64 bytes (0.06 KB, 0.00 MB)
@@ -58,90 +58,90 @@ Compressing 512 bytes (0.50 KB, 0.00 MB)
 Huffman compression is 176.17% of the original size.
 Huffman compression took 0.0001 seconds.
 LZW compression is 95.51% of the original size.
-LZW compression took 0.0001 seconds.
+LZW compression took 0.0004 seconds.
 
 ----------
 Compressing 1024 bytes (1.00 KB, 0.00 MB)
 Huffman compression is 124.71% of the original size.
-Huffman compression took 0.0002 seconds.
+Huffman compression took 0.0003 seconds.
 LZW compression is 83.20% of the original size.
-LZW compression took 0.0003 seconds.
+LZW compression took 0.0002 seconds.
 
 ----------
 Compressing 2048 bytes (2.00 KB, 0.00 MB)
 Huffman compression is 91.75% of the original size.
 Huffman compression took 0.0003 seconds.
 LZW compression is 73.24% of the original size.
-LZW compression took 0.0005 seconds.
+LZW compression took 0.0004 seconds.
 
 ----------
 Compressing 4096 bytes (4.00 KB, 0.00 MB)
 Huffman compression is 75.20% of the original size.
-Huffman compression took 0.0005 seconds.
+Huffman compression took 0.0008 seconds.
 LZW compression is 65.11% of the original size.
 LZW compression took 0.0009 seconds.
 
 ----------
 Compressing 8192 bytes (8.00 KB, 0.01 MB)
 Huffman compression is 65.47% of the original size.
-Huffman compression took 0.0012 seconds.
+Huffman compression took 0.0009 seconds.
 LZW compression is 57.39% of the original size.
-LZW compression took 0.0016 seconds.
+LZW compression took 0.0015 seconds.
 
 ----------
 Compressing 16384 bytes (16.00 KB, 0.02 MB)
 Huffman compression is 60.84% of the original size.
-Huffman compression took 0.0016 seconds.
+Huffman compression took 0.0017 seconds.
 LZW compression is 56.93% of the original size.
-LZW compression took 0.0029 seconds.
+LZW compression took 0.0035 seconds.
 
 ----------
 Compressing 32768 bytes (32.00 KB, 0.03 MB)
 Huffman compression is 58.60% of the original size.
-Huffman compression took 0.0031 seconds.
+Huffman compression took 0.0078 seconds.
 LZW compression is 55.26% of the original size.
-LZW compression took 0.0056 seconds.
+LZW compression took 0.0058 seconds.
 
 ----------
 Compressing 65536 bytes (64.00 KB, 0.06 MB)
 Huffman compression is 57.36% of the original size.
-Huffman compression took 0.0060 seconds.
+Huffman compression took 0.0062 seconds.
 LZW compression is 54.66% of the original size.
-LZW compression took 0.0110 seconds.
+LZW compression took 0.0111 seconds.
 
 ----------
 Compressing 131072 bytes (128.00 KB, 0.12 MB)
 Huffman compression is 56.81% of the original size.
-Huffman compression took 0.0117 seconds.
+Huffman compression took 0.0119 seconds.
 LZW compression is 54.47% of the original size.
-LZW compression took 0.0218 seconds.
+LZW compression took 0.0219 seconds.
 
 ----------
 Compressing 262144 bytes (256.00 KB, 0.25 MB)
 Huffman compression is 56.45% of the original size.
-Huffman compression took 0.0236 seconds.
+Huffman compression took 0.0234 seconds.
 LZW compression is 54.35% of the original size.
-LZW compression took 0.0441 seconds.
+LZW compression took 0.0436 seconds.
 
 ----------
 Compressing 524288 bytes (512.00 KB, 0.50 MB)
 Huffman compression is 56.31% of the original size.
-Huffman compression took 0.0462 seconds.
+Huffman compression took 0.0476 seconds.
 LZW compression is 54.34% of the original size.
-LZW compression took 0.0856 seconds.
+LZW compression took 0.0874 seconds.
 
 ----------
 Compressing 1048576 bytes (1024.00 KB, 1.00 MB)
 Huffman compression is 56.24% of the original size.
-Huffman compression took 0.0958 seconds.
+Huffman compression took 0.0948 seconds.
 LZW compression is 54.31% of the original size.
-LZW compression took 0.1732 seconds.
+LZW compression took 0.1734 seconds.
 
 ----------
 Compressing 2097152 bytes (2048.00 KB, 2.00 MB)
 Huffman compression is 56.19% of the original size.
-Huffman compression took 0.1877 seconds.
+Huffman compression took 0.1882 seconds.
 LZW compression is 54.33% of the original size.
-LZW compression took 0.3495 seconds.
+LZW compression took 0.3580 seconds.
 
 ----------
