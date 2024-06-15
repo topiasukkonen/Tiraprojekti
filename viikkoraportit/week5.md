@@ -1,0 +1,1 @@
+This week I did some code clarity improvements that would likely make the project more understandable on the code level and also improved documentation. This took about 6 hours of work.
