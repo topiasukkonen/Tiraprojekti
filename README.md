@@ -26,7 +26,7 @@ Here's how you can run the program:
 
 # Further Documentation
 
-- [Implementation](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/implementation.md)
-- [Spesifications](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/specs.md)
-- [Tests](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/tests.md)
-- [User Guide](https://github.com/topiasukkonen/Tiraprojekti/blob/main/Documentation/userguide.md)
+- [Implementation](https://github.com/topiasukkonen/Tiraprojekti/blob/main/documentation/implementation.md)
+- [Spesifications](https://github.com/topiasukkonen/Tiraprojekti/blob/main/documentation/specs.md)
+- [Tests](https://github.com/topiasukkonen/Tiraprojekti/blob/main/documentation/tests.md)
+- [User Guide](https://github.com/topiasukkonen/Tiraprojekti/blob/main/documentation/userguide.md)
