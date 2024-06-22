@@ -5,64 +5,31 @@ from os import path
 from typing import Tuple, List, Dict, Union
 from .config import BASE_PATH
 import pickle
-
-def serialize_huffman_tree(tree: List[Tuple[int, str]], file_path: str) -> None:
-    """Serialize and save the Huffman tree to a file."""
-    with open(file_path, 'wb') as file:
-        pickle.dump(tree, file)
-
-def deserialize_huffman_tree(file_path: str) -> List[Tuple[int, str]]:
-    """Deserialize and load the Huffman tree from a file."""
-    with open(file_path, 'rb') as file:
-        return pickle.load(file)
-
+import struct
 
 def read_file(file_path: str, size: int = None) -> bytes:
-    """Read n-bytes of binary data from a file.
-
-    Args:
-        file_path (str): Path to the file.
-        size (int): Number of bytes to read.
-
-    Returns:
-        bytes: Content of the file.
-    """
     with open(file_path, 'rb') as file:
         return file.read(size)
 
 def write_file(file_path: str, data: Union[bytes, List[int]]) -> None:
-    """Write binary data to a file.
-a
-    Args:
-        file_path (str): Path to the file.
-        data (Union[bytes, List[int]]): Data to write to the file.
-    """
     with open(file_path, 'wb') as file:
         file.write(data)
-        #pickle.dump(data, file)
 
+# Huffman encoding function. Returns encoded bytes, Huffman codes, and padding length.
 def huff_encode(input: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
-    """Encode using Huffman coding.
-
-    Args:
-        input (bytes): The input to encode.
-
-    Returns:
-        Tuple[bytes, List[Tuple[int, str]], int]: Encoded input, Huffman codes, and extra padding length.
-    """
     if not input:
         return b'', [], 0
 
-    # Calculate frequency of each byte
+    # Count frequency of each byte
     freq_dict = defaultdict(int)
     for byte in input:
         freq_dict[byte] += 1
 
-    # Create queue with initial frequencies
+    # Create a min heap of nodes. Each node is [weight, [symbol, code]]
     heap = [[weight, [symbol, ""]] for symbol, weight in freq_dict.items()]
     hq.heapify(heap)
 
-    # Build the Huffman Tree
+    # Build the Huffman tree
     while len(heap) > 1:
         low = hq.heappop(heap)
         high = hq.heappop(heap)
@@ -72,42 +39,30 @@ def huff_encode(input: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
             pair[1] = '1' + pair[1]
         hq.heappush(heap, [low[0] + high[0]] + low[1:] + high[1:])
 
-    # Extract Huffman codes
+    # Generate Huffman codes
     huffman_codes = sorted(hq.heappop(heap)[1:], key=lambda p: (len(p[-1]), p))
     code_dict = {symbol: code for symbol, code in huffman_codes}
 
-    # Encode the input message
+    # Encode the input
     encoded_str = ''.join(code_dict[byte] for byte in input)
-
-    # Add padding to make the length a multiple of 8
     padding_length = 8 - len(encoded_str) % 8
     encoded_str += '0' * padding_length
 
-    # Convert the encoded input to bytes
+    # Convert binary string to bytes
     encoded_bytes = int(encoded_str, 2).to_bytes((len(encoded_str) + 7) // 8, byteorder='big')
 
     return encoded_bytes, huffman_codes, padding_length
 
+# Huffman decoding function. Takes encoded bytes, Huffman codes, and padding length.
 def huff_decode(encoded_bytes: bytes, huffman_codes: List[Tuple[int, str]], padding_length: int) -> bytes:
-    """Decode a Huffman encoded input.
-
-    Args:
-        encoded_bytes (bytes): Encoded input.
-        huffman_codes (List[Tuple[int, str]]): Huffman codes.
-        padding_length (int): Extra padding length.
-
-    Returns:
-        bytes: Decoded input.
-    """
     if not encoded_bytes or not huffman_codes:
         return b''
 
-    # Create a dictionary to map codes back to symbols
+    # Reverse the Huffman codes for decoding
     inverse_codes = {code: symbol for symbol, code in huffman_codes}
-
-    # Convert the encoded input message bytes to a binary string
+    
+    # Convert bytes to binary string and remove padding
     binary_str = bin(int.from_bytes(encoded_bytes, byteorder='big'))[2:].zfill(len(encoded_bytes) * 8)
-    # Remove the padding
     binary_str = binary_str[:-padding_length]
 
     # Decode the binary string
@@ -121,163 +76,130 @@ def huff_decode(encoded_bytes: bytes, huffman_codes: List[Tuple[int, str]], padd
 
     return bytes(decoded_input)
 
-def lzw_encode(input_data: bytes, max_dict_size: int = 4096) -> Tuple[List[int], Dict[bytes, int]]:
-    """Encode an input using LZW compression with a capped dictionary size.
+# Serialize the Huffman tree for storage
+def serialize_huffman_tree(tree: List[Tuple[int, str]]) -> bytes:
+    return pickle.dumps(tree)
 
-    Args:
-        input_data (bytes): The input to encode.
-        max_dict_size (int): Maximum dictionary size.
+# Deserialize the Huffman tree from storage
+def deserialize_huffman_tree(serialized_tree: bytes) -> List[Tuple[int, str]]:
+    return pickle.loads(serialized_tree)
 
-    Returns:
-        Tuple[List[int], Dict[bytes, int]]: Encoded input and dictionary used for encoding.
-    """
+# Write Huffman compressed data to a file
+def write_huffman_compressed(file_path: str, encoded_bytes: bytes, huffman_codes: List[Tuple[int, str]], padding_length: int) -> None:
+    serialized_tree = serialize_huffman_tree(huffman_codes)
+    tree_size = len(serialized_tree)
+    
+    with open(file_path, 'wb') as file:
+        # Write tree size (4 bytes), padding length (1 byte), tree data, and encoded data
+        file.write(struct.pack('>I', tree_size))
+        file.write(struct.pack('B', padding_length))
+        file.write(serialized_tree)
+        file.write(encoded_bytes)
+
+# Read Huffman compressed data from a file
+def read_huffman_compressed(file_path: str) -> Tuple[bytes, List[Tuple[int, str]], int]:
+    with open(file_path, 'rb') as file:
+        tree_size = struct.unpack('>I', file.read(4))[0]
+        padding_length = struct.unpack('B', file.read(1))[0]
+        serialized_tree = file.read(tree_size)
+        encoded_bytes = file.read()
+    
+    huffman_codes = deserialize_huffman_tree(serialized_tree)
+    return encoded_bytes, huffman_codes, padding_length
+
+# LZW encoding function. Returns encoded data and final dictionary.
+def lzw_encode(input_data: bytes, max_dict_size: int = 6000) -> Tuple[List[int], Dict[bytes, int]]:
     if not input_data:
         return [], {}
 
+    # Initialize dictionary with single-byte sequences
     dict_size = 256
     dictionary = {bytes([i]): i for i in range(dict_size)}
-    current_sequence = bytes([input_data[0]])
-    encoded_output = []
+    result = []
+    w = bytes([input_data[0]])
     
-    for byte in input_data[1:]:
-        byte = bytes([byte])
-        combined_sequence = current_sequence + byte
-        
-        if combined_sequence in dictionary:
-            current_sequence = combined_sequence
+    # LZW compression loop
+    for c in input_data[1:]:
+        c = bytes([c])
+        wc = w + c
+        if wc in dictionary:
+            w = wc
         else:
-            encoded_output.append(dictionary[current_sequence])
-            if dict_size < max_dict_size:
-                dictionary[combined_sequence] = dict_size
+            result.append(dictionary[w])
+            if len(dictionary) < max_dict_size:
+                dictionary[wc] = dict_size
                 dict_size += 1
-            else:
-                dictionary = {bytes([i]): i for i in range(256)}
-                dict_size = 256
-                dictionary[combined_sequence] = dict_size
-                dict_size += 1
-            current_sequence = byte
-            
-    encoded_output.append(dictionary[current_sequence])
-    return encoded_output, dictionary
+            w = c
+    
+    # Output code for remaining sequence
+    if w:
+        result.append(dictionary[w])
+    
+    return result, dictionary
 
-def lzw_decode(encoded_input: List[int], max_dict_size: int = 4096) -> bytes:
-    """Decode a LZW compressed input.
-
-    Args:
-        encoded_input (List[int]): Compressed input.
-        max_dict_size (int): Maximum dictionary size.
-
-    Returns:
-        bytes: Decoded input.
-    """
+# LZW decoding function. Takes encoded data and max dictionary size.
+def lzw_decode(encoded_input: List[int], max_dict_size: int = 6000) -> bytes:
     if not encoded_input:
         return b''
 
+    # Initialize dictionary with single-byte sequences
     dict_size = 256
-    reverse_dictionary = {i: bytes([i]) for i in range(dict_size)}
-    decoded_output = reverse_dictionary[encoded_input[0]]
-    previous_sequence = decoded_output
+    dictionary = {i: bytes([i]) for i in range(dict_size)}
     
-    for code in encoded_input[1:]:
-        if code in reverse_dictionary:
-            current_sequence = reverse_dictionary[code]
-        elif code == len(reverse_dictionary):
-            current_sequence = previous_sequence + previous_sequence[0:1]
-        else:
-            raise ValueError(f'Bad compressed code: {code}')
-        
-        decoded_output += current_sequence
-        
-        if len(reverse_dictionary) < max_dict_size:
-            reverse_dictionary[dict_size] = previous_sequence + current_sequence[0:1]
-            dict_size += 1
-        else:
-            reverse_dictionary = {i: bytes([i]) for i in range(256)}
-            dict_size = 256
-            reverse_dictionary[dict_size] = previous_sequence + current_sequence[0:1]
-            dict_size += 1
-            
-        previous_sequence = current_sequence
+    result = bytearray()
     
-    return decoded_output
+    # Handle the first code
+    if encoded_input[0] >= dict_size:
+        raise ValueError(f'Bad compressed code: {encoded_input[0]}')
+    w = dictionary[encoded_input[0]]
+    result.extend(w)
+    
+    # LZW decompression loop
+    for k in encoded_input[1:]:
+        if k in dictionary:
+            entry = dictionary[k]
+        elif k == dict_size:
+            entry = w + w[:1]
+        else:
+            raise ValueError(f'Bad compressed code: {k}')
+        
+        result.extend(entry)
+        
+        if len(dictionary) < max_dict_size:
+            dictionary[dict_size] = w + entry[:1]
+            dict_size += 1
+        
+        w = entry
+    
+    return bytes(result)
 
-
+# Write LZW compressed data to a file
 def write_compressed_to_file(comp_msg: List[int], file_path: str) -> None:
-    """Write the compressed message to a binary file.
-
-    Args:
-        comp_msg (List[int]): Compressed message.
-        file_path (str): Path to the file where compressed message will be written.
-    """
-    # Convert the list of codes to a bit string
-    bit_string = ''.join(format(code, '012b') for code in comp_msg)
-    byte_array = bytearray()
-
-    # Convert the bit string to bytes
-    for i in range(0, len(bit_string), 8):
-        byte_array.append(int(bit_string[i:i+8], 2))
-
     with open(file_path, 'wb') as f:
-        f.write(byte_array)
+        for code in comp_msg:
+            f.write(code.to_bytes(2, byteorder='big'))
 
+# Read LZW compressed data from a file
 def read_compressed_from_file(file_path: str) -> List[int]:
-    """Read the compressed message from a binary file.
-
-    Args:
-        file_path (str): Path to the file containing the compressed message.
-
-    Returns:
-        List[int]: Compressed message.
-    """
     with open(file_path, 'rb') as f:
-        byte_array = f.read()
+        byte_data = f.read()
+    return [int.from_bytes(byte_data[i:i+2], byteorder='big') for i in range(0, len(byte_data), 2)]
 
-    # Convert the bytes back to a bit string
-    bit_string = ''.join(format(byte, '08b') for byte in byte_array)
-    
-    # Extract 12-bit codes from the bit string
-    comp_msg = [int(bit_string[i:i+12], 2) for i in range(0, len(bit_string), 12) if i + 12 <= len(bit_string)]
-
-    return comp_msg
-
+# Calculate size reduction percentage
 def size_reduction(original: bytes, compressed: bytes) -> float:
-    """Calculate the size reduction percentage.
-
-    Args:
-        original (bytes): Original message.
-        compressed (bytes): Compressed message.
-
-    Returns:
-        float: Size reduction percentage.
-    """
     return len(compressed) / len(original) * 100
 
+# Print and write compression results
 def print_compression_results(method: str, original: bytes, compressed: bytes, time_taken: float, file, additional_size: int = 0) -> None:
-    """Print and log the results of the compression method.
-
-    Args:
-        method (str): Compression method name.
-        original (bytes): Original.
-        compressed (bytes): Compressed.
-        time_taken (float): Time taken for compression.
-        file: File object to log the results.
-        additional_size (int): Size of additional metadata (e.g., Huffman tree).
-    """
     compressed_size = len(compressed) + additional_size
     reduction = compressed_size / len(original) * 100
     result_str = f"{method} compression is {reduction:.2f}% of the original size.\n{method} compression took {time_taken:.4f} seconds.\n"
     print(result_str)
     file.write(result_str)
 
+# Main function to check compression
 def check(file_path: str) -> None:
-    """Conduct compression tests on a file.
-
-    Args:
-        file_path (str): Path to the file to be tested.
-        
-    Alter MAX_SIZE to test with file sizes of your choice.
-    """
-    MAX_SIZE = 1024 * 1024 * 2.1  # 2 MB
+    MAX_SIZE = 1024 * 1024 * 20  # 20 MB
     size = 2
     results_file = path.join(BASE_PATH, 'results.txt')
 
@@ -287,42 +209,41 @@ def check(file_path: str) -> None:
             print(f"Compressing {len(tst_msg)} bytes ({len(tst_msg) / 1024:.2f} KB, {len(tst_msg) / 1024 / 1024:.2f} MB)")
             file.write(f"Compressing {len(tst_msg)} bytes ({len(tst_msg) / 1024:.2f} KB, {len(tst_msg) / 1024 / 1024:.2f} MB)\n")
 
-            # Huffman
+            # Huffman compression
             start_time = time()
             h_enc_msg, h_codes, extra_padding = huff_encode(tst_msg)
             huffman_time = time() - start_time
 
-            huff_tree_path = path.join(BASE_PATH, 'packedHuff/huffman_tree.pkl')
-            serialize_huffman_tree(h_codes, huff_tree_path)
+            huffman_compressed_path = path.join(BASE_PATH, 'packedHuff/compressed.bin')
+            write_huffman_compressed(huffman_compressed_path, h_enc_msg, h_codes, extra_padding)
 
-            h_dec_msg = huff_decode(h_enc_msg, h_codes, extra_padding)
+            # Verify Huffman compression
+            read_enc_msg, read_codes, read_padding = read_huffman_compressed(huffman_compressed_path)
+
+            h_dec_msg = huff_decode(read_enc_msg, read_codes, read_padding)
             if tst_msg == h_dec_msg:
                 print("Huffman decoding successful!")
-                write_file(path.join(BASE_PATH, 'packedHuff/compressed.bin'), h_enc_msg)
                 text_file_path = path.join(BASE_PATH, 'packedHuff/decoded.txt')
                 with open(text_file_path, 'w') as txt_file:
                     txt_file.write(h_dec_msg.decode(errors='ignore'))
 
-                # Calculate compressed size
-                compressed_size = len(h_enc_msg)
-                huff_tree_size = path.getsize(huff_tree_path)
-                total_compressed_size = compressed_size + huff_tree_size
+                compressed_size = path.getsize(huffman_compressed_path)
             else:
                 raise ValueError("Huffman decoding failed!")
 
-            print_compression_results("Huffman", tst_msg, h_enc_msg, huffman_time, file, additional_size=huff_tree_size)
+            print_compression_results("Huffman", tst_msg, h_enc_msg, huffman_time, file, additional_size=compressed_size - len(h_enc_msg))
             
             # LZW compression
             start_time = time()
-            lzw_comp_msg, lzw_dict = lzw_encode(tst_msg)
+            lzw_comp_msg, lzw_dict = lzw_encode(tst_msg, max_dict_size=6000)
             lzw_time = time() - start_time
 
-            lzw_dec_msg = lzw_decode(lzw_comp_msg, max_dict_size=4096)
+            # Verify LZW compression
+            lzw_dec_msg = lzw_decode(lzw_comp_msg, max_dict_size=6000)
             if tst_msg == lzw_dec_msg:
                 print("LZW decoding successful!")
                 write_compressed_to_file(lzw_comp_msg, path.join(BASE_PATH, 'packedLZW/compressed.bin'))
 
-                # Save the decoded LZW input message
                 text_file_path = path.join(BASE_PATH, 'packedLZW/decoded.txt')
                 with open(text_file_path, 'w') as txt_file:
                     txt_file.write(lzw_dec_msg.decode(errors='ignore'))

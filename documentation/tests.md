@@ -16,14 +16,17 @@ The project uses the following testing dependencies:
 These dependencies are listed as development dependencies in the Poetry project file (`pyproject.toml`).
 
 ### Test Structure
-The tests are located in the `test_compressor.py` file (compressor/tests/test_compressor.py). This file contains unit tests for the functionality provided by the `compressor.py` module. The following functions are tested:
+The tests are located in the `test_compressor.py` file. This file contains comprehensive unit tests for the functionality provided by the compressor module. The following areas are tested:
 
-- read_file()
-- huff_encode()
-- huff_decode()
-- lzw_encode()
-- lzw_decode()
-- size_reduction()
+- File I/O operations (read_file(), write_file())
+- Huffman encoding and decoding (huff_encode(), huff_decode())
+- LZW compression and decompression (lzw_encode(), lzw_decode())
+- Huffman tree serialization and deserialization
+- Size reduction calculation
+- Performance on large files
+- Handling of different data types (ASCII, Unicode, binary)
+- Error handling and edge cases
+- Compression with limited dictionary size for LZW
 
 ### Running Tests
 To run the tests, first navigate to the project's root directory (`tiraprojekti`) in your terminal. 
