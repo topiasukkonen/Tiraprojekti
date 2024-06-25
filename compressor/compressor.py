@@ -116,24 +116,23 @@ def lzw_encode(input_data: bytes, max_dict_size: int = 6000) -> Tuple[List[int],
     dict_size = 256
     dictionary = {bytes([i]): i for i in range(dict_size)}
     result = []
-    w = bytes([input_data[0]])
-    
+    atm = bytes([input_data[0]])
     # LZW compression loop
-    for c in input_data[1:]:
-        c = bytes([c])
-        wc = w + c
-        if wc in dictionary:
-            w = wc
+    for bte in input_data[1:]:
+        bte = bytes([bte])
+        new = atm + bte
+        if new in dictionary:
+            atm = new
         else:
-            result.append(dictionary[w])
+            result.append(dictionary[atm])
             if len(dictionary) < max_dict_size:
-                dictionary[wc] = dict_size
+                dictionary[new] = dict_size
                 dict_size += 1
-            w = c
+            atm = bte
     
     # Output code for remaining sequence
-    if w:
-        result.append(dictionary[w])
+    if atm:
+        result.append(dictionary[atm])
     
     return result, dictionary
 
@@ -151,25 +150,25 @@ def lzw_decode(encoded_input: List[int], max_dict_size: int = 6000) -> bytes:
     # Handle the first code
     if encoded_input[0] >= dict_size:
         raise ValueError(f'Bad compressed code: {encoded_input[0]}')
-    w = dictionary[encoded_input[0]]
-    result.extend(w)
+    atm = dictionary[encoded_input[0]]
+    result.extend(atm)
     
     # LZW decompression loop
-    for k in encoded_input[1:]:
-        if k in dictionary:
-            entry = dictionary[k]
-        elif k == dict_size:
-            entry = w + w[:1]
+    for code in encoded_input[1:]:
+        if code in dictionary:
+            entry = dictionary[code]
+        elif code == dict_size:
+            entry = atm + atm[:1]
         else:
-            raise ValueError(f'Bad compressed code: {k}')
+            raise ValueError(f'Bad compressed code: {code}')
         
         result.extend(entry)
         
         if len(dictionary) < max_dict_size:
-            dictionary[dict_size] = w + entry[:1]
+            dictionary[dict_size]= atm + entry[:1]
             dict_size += 1
         
-        w = entry
+        atm=entry
     
     return bytes(result)
 
@@ -177,7 +176,7 @@ def lzw_decode(encoded_input: List[int], max_dict_size: int = 6000) -> bytes:
 def write_compressed_to_file(comp_msg: List[int], file_path: str) -> None:
     with open(file_path, 'wb') as f:
         for code in comp_msg:
-            f.write(code.to_bytes(2, byteorder='big'))
+            f.write(code.to_bytes(2,byteorder='big'))
 
 # Read LZW compressed data from a file
 def read_compressed_from_file(file_path: str) -> List[int]:
@@ -252,9 +251,9 @@ def check(file_path: str) -> None:
 
             with open(path.join(BASE_PATH, 'packedLZW/compressed.bin'), 'rb') as f:
                 lzw_comp_bytes = f.read()
-    
+
             print_compression_results("LZW", tst_msg, lzw_comp_bytes, lzw_time, file)
 
             file.write('\n'+ '-'*10 +'\n')
-            
+
             size *= 2

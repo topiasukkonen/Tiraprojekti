@@ -16,8 +16,7 @@ def sample_data():
 
 @pytest.fixture
 def large_data():
-    # Generate 5 MB of random data
-    return os.urandom(1024 * 1024 * 5)
+    return os.urandom(1024 * 1024 * 10)
 
 # Test read and write
 def test_read_write_file(tmp_path, sample_data):
@@ -35,7 +34,6 @@ def test_read_write_file(tmp_path, sample_data):
 def test_huffman_codec(data):
     enc_data, huff_c, padding = huff_encode(data)
     assert huff_decode(enc_data, huff_c, padding) == data, "Huffman codec failed"
-
 # LZW encoding and decoding with different types of data
 @pytest.mark.parametrize('data', [
     b'ASCII text',
@@ -94,11 +92,11 @@ def test_large_file_performance(large_data):
     
     print(f'Compression times - Huffman: {huffman_time:.4f}s, LZW: {lzw_time:.4f}s')
 
-# LZW with limited dictionary size
+# LZW with small dictionary size
 def test_max_dict_size():
     data = b'abcdefghijklmnopqrstuvwxyz' * 1000
-    comp_data, _ = lzw_encode(data, max_dict_size=300)
-    assert lzw_decode(comp_data, max_dict_size=300) == data, "LZW failed with limited dictionary"
+    comp_data, _ = lzw_encode(data, max_dict_size=30)
+    assert lzw_decode(comp_data, max_dict_size=30) == data, "LZW failed with limited dictionary"
 
 # Testing different file sizes
 @pytest.mark.parametrize('size', [2, 1024, 1024*1024])
@@ -122,7 +120,7 @@ def test_error_handling():
 
     # Raise a FileNotFoundError
     with pytest.raises(FileNotFoundError):
-        read_file("this_file_doesnt_exist.txt")
+        read_file("doesnt_exist.txt")
 
 if __name__ == "__main__":
     pytest.main()
