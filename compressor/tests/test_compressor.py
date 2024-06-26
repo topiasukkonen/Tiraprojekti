@@ -27,7 +27,7 @@ def test_read_write_file(tmp_path, sample_data):
 # Huffman encoding and decoding with different types of data
 @pytest.mark.parametrize('data', [
     b'ASCII text',
-    'Немного Unicode текста'.encode('utf-8'),
+    'sdssdgнгs Unicode sdsd'.encode('utf-8'),
     os.urandom(100),  # Binary
     b''  # Empty
 ])
@@ -65,7 +65,7 @@ def test_lzw_file_io(tmp_path, sample_data):
 
 # Serialize and deserialize Huffman trees correctly
 def test_huffman_tree_serialization():
-    tree = [(97, '0'), (98, '10'), (99, '11')]  # Tree for (ASCII) 'a', 'b', 'c'
+    tree = [(97, '0'), (98, '10'), (99, '11')]  # Tree for (ASCII) 'a', 'b', 'c' + codes
     serialized = serialize_huffman_tree(tree)
     deserialized = deserialize_huffman_tree(serialized)
     assert deserialized == tree, "Huffman tree serialization/deserialization failed"

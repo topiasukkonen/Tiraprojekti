@@ -20,7 +20,7 @@ def huff_encode(input: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
     if not input:
         return b'', [], 0
 
-    # Count frequency of each byte
+    # Count frequency of each byte in the input
     freq_dict = defaultdict(int)
     for byte in input:
         freq_dict[byte] += 1
@@ -29,26 +29,31 @@ def huff_encode(input: bytes) -> Tuple[bytes, List[Tuple[int, str]], int]:
     heap = [[weight, [symbol, ""]] for symbol, weight in freq_dict.items()]
     hq.heapify(heap)
 
-    # Build the Huffman tree
+    # Build the Huffman tree. Repeatedly combine the two nodes with lowest weight until only one node (the root) remains.
     while len(heap) > 1:
         low = hq.heappop(heap)
         high = hq.heappop(heap)
+        # Assign '0' to the path to the lower weight node
         for pair in low[1:]:
             pair[1] = '0' + pair[1]
+        # Assign '1' to the path to the higher weight node
         for pair in high[1:]:
             pair[1] = '1' + pair[1]
+        # Push the combined node back to the heap
         hq.heappush(heap, [low[0] + high[0]] + low[1:] + high[1:])
 
-    # Generate Huffman codes
+    # Generate Huffman codes and extract the final codes from the completed tree
     huffman_codes = sorted(hq.heappop(heap)[1:], key=lambda p: (len(p[-1]), p))
+    # Create a dictionary for easy lookup of codes
     code_dict = {symbol: code for symbol, code in huffman_codes}
 
-    # Encode the input
+    # Encode the input using the generated Huffman codes
     encoded_str = ''.join(code_dict[byte] for byte in input)
+    # Calculate padding needed to make the encoded string length a multiple of 8
     padding_length = 8 - len(encoded_str) % 8
     encoded_str += '0' * padding_length
 
-    # Convert binary string to bytes
+    # Convert the binary string to bytes for efficient storage
     encoded_bytes = int(encoded_str, 2).to_bytes((len(encoded_str) + 7) // 8, byteorder='big')
 
     return encoded_bytes, huffman_codes, padding_length
@@ -58,18 +63,20 @@ def huff_decode(encoded_bytes: bytes, huffman_codes: List[Tuple[int, str]], padd
     if not encoded_bytes or not huffman_codes:
         return b''
 
-    # Reverse the Huffman codes for decoding
+    # Create a reverse lookup dictionary for decoding
     inverse_codes = {code: symbol for symbol, code in huffman_codes}
     
-    # Convert bytes to binary string and remove padding
+    # Convert encoded bytes back to a binary string
     binary_str = bin(int.from_bytes(encoded_bytes, byteorder='big'))[2:].zfill(len(encoded_bytes) * 8)
+    # Remove padding from the binary string
     binary_str = binary_str[:-padding_length]
 
-    # Decode the binary string
+    # Decode the binary string using the Huffman codes
     decoded_input = bytearray()
     temp_code = ""
     for bit in binary_str:
         temp_code += bit
+        # When a valid code is found, append the corresponding symbol to the output
         if temp_code in inverse_codes:
             decoded_input.append(inverse_codes[temp_code])
             temp_code = ""
@@ -112,25 +119,34 @@ def lzw_encode(input_data: bytes, max_dict_size: int = 6000) -> Tuple[List[int],
     if not input_data:
         return [], {}
 
-    # Initialize dictionary with single-byte sequences
+    # Initialize dictionary with single-byte sequences (0-255)
     dict_size = 256
     dictionary = {bytes([i]): i for i in range(dict_size)}
+    
     result = []
-    atm = bytes([input_data[0]])
+    atm = bytes([input_data[0]])  # Current sequence being processed
+    
     # LZW compression loop
     for bte in input_data[1:]:
         bte = bytes([bte])
-        new = atm + bte
+        new = atm + bte  # Try to extend the current sequence
+        
         if new in dictionary:
+            # If the extended sequence is in the dictionary, keep extending
             atm = new
         else:
+            # If not, output the code for the current sequence
             result.append(dictionary[atm])
+            
+            # Add the new sequence to the dictionary if there's room
             if len(dictionary) < max_dict_size:
                 dictionary[new] = dict_size
                 dict_size += 1
+            
+            # Start a new sequence with the current byte
             atm = bte
     
-    # Output code for remaining sequence
+    # Output code for any remaining sequence
     if atm:
         result.append(dictionary[atm])
     
@@ -141,13 +157,13 @@ def lzw_decode(encoded_input: List[int], max_dict_size: int = 6000) -> bytes:
     if not encoded_input:
         return b''
 
-    # Initialize dictionary with single-byte sequences
+    # Initialize dictionary with single-byte sequences (0-255)
     dict_size = 256
     dictionary = {i: bytes([i]) for i in range(dict_size)}
     
     result = bytearray()
     
-    # Handle the first code
+    # Handle the first code separately
     if encoded_input[0] >= dict_size:
         raise ValueError(f'Bad compressed code: {encoded_input[0]}')
     atm = dictionary[encoded_input[0]]
@@ -156,19 +172,24 @@ def lzw_decode(encoded_input: List[int], max_dict_size: int = 6000) -> bytes:
     # LZW decompression loop
     for code in encoded_input[1:]:
         if code in dictionary:
+            # If the code is in the dictionary, retrieve the corresponding sequence
             entry = dictionary[code]
         elif code == dict_size:
+            # If the code is the next available code, must be the current sequence plus its first byte
             entry = atm + atm[:1]
         else:
             raise ValueError(f'Bad compressed code: {code}')
         
+        # Add the decoded sequence to the result
         result.extend(entry)
         
+        # Add a new entry to the dictionary if there's room
         if len(dictionary) < max_dict_size:
-            dictionary[dict_size]= atm + entry[:1]
+            dictionary[dict_size] = atm + entry[:1]
             dict_size += 1
         
-        atm=entry
+        # Update the current sequence for the next iteration
+        atm = entry
     
     return bytes(result)
 
@@ -198,7 +219,7 @@ def print_compression_results(method: str, original: bytes, compressed: bytes, t
 
 # Main function to check compression
 def check(file_path: str) -> None:
-    MAX_SIZE = 1024 * 1024 * 20  # 20 MB
+    MAX_SIZE = 1024 * 1024 * 4.1 # 20 MB
     size = 2
     results_file = path.join(BASE_PATH, 'results.txt')
 
