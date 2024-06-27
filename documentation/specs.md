@@ -8,3 +8,4 @@
 - **Target time and space complexity:** Time and space complexity should be O(n) for both algorithms.
 - **Degree programme:** Bachelor’s in Science (BSc), Computer Science
 - **Documentation language:** English
+- **AI use** AI has not been used as part of the project
