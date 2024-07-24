@@ -6,13 +6,13 @@ from ..compressor import *
 
 
 # Paths for test files
-test_text_path = os.path.join(BASE_PATH, 'texts/test.txt')
-test_binary_path = os.path.join(BASE_PATH, 'texts/test.bin')
+test_file = os.path.join(BASE_PATH, 'texts', 'testtext.txt')
+
 
 # Sample data for testing
 @pytest.fixture
 def sample_data():
-    return b'Test string for compression.'
+    return read_file(test_file)
 
 @pytest.fixture
 def large_data():
